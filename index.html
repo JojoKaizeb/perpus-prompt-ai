@@ -1,0 +1,3724 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <!-- Perbaikan viewport untuk mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Perpustakaan Prompt AI - SouGPT</title>
+    <link rel="icon" href="https://files.catbox.moe/your-favicon.ico" type="image/x-icon">
+    
+    <!-- Font Awesome untuk WhatsApp/Telegram icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== VARIABLES ===== */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f7fa;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --premium-color: #f59e0b;
+            --whatsapp-green: #25D366;
+            --telegram-blue: #0088cc;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --shadow-mobile: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --animation-speed: 0.3s;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-mobile: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== RESET & BASE ===== */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background var(--animation-speed), color var(--animation-speed);
+            min-height: 100vh;
+            overflow-x: hidden;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+            touch-action: manipulation;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Safe area untuk iPhone notch */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== MOBILE OPTIMIZATIONS ===== */
+        @media (max-width: 768px) {
+            html {
+                font-size: 15px;
+            }
+            
+            body {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            html {
+                font-size: 14px;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            html {
+                font-size: 13px;
+            }
+        }
+
+        /* ===== PAGE TRANSITIONS ===== */
+        .page-container {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            min-height: calc(100vh - 200px);
+            width: 100%;
+            overflow-x: hidden;
+        }
+        .page-container.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== UTILITY ===== */
+        .container { 
+            max-width: 100%;
+            margin: 0 auto; 
+            padding: 0 16px;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 12px;
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 8px;
+            }
+        }
+        
+        .hidden { 
+            display: none !important; 
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--animation-speed);
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+        
+        @media (max-width: 768px) {
+            .btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
+                min-height: 48px;
+                min-width: 48px;
+            }
+        }
+        
+        .btn:active {
+            transform: scale(0.97);
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        /* ===== CUSTOM ALERT ===== */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 16px;
+            backdrop-filter: blur(2px);
+            /* Safe area untuk mobile */
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+        
+        .alert-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .alert-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 90vw;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        @media (max-width: 480px) {
+            .alert-box {
+                padding: 1.25rem;
+                max-width: 95vw;
+            }
+        }
+        
+        .alert-overlay.show .alert-box {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .alert-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        @media (max-width: 480px) {
+            .alert-title {
+                font-size: 1.1rem;
+            }
+        }
+        
+        .alert-icon {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .alert-success .alert-icon {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .alert-error .alert-icon {
+            background: var(--error-color);
+            color: white;
+        }
+        
+        .alert-info .alert-icon {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .alert-message {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            white-space: pre-line;
+            word-break: break-word;
+            font-size: 0.95rem;
+        }
+        
+        .alert-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .btn-alert {
+            padding: 0.625rem 1.5rem;
+            min-width: 100px;
+            min-height: 44px;
+        }
+        
+        .btn-alert-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-alert-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ===== HEADER MOBILE FRIENDLY ===== */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            transform: translateY(-100%);
+            animation: slideDown 0.5s ease-out forwards 0.2s;
+            backdrop-filter: blur(10px);
+            background-color: rgba(var(--bg-card-rgb), 0.9);
+            /* Safe area untuk iPhone */
+            padding-top: max(1rem, env(safe-area-inset-top));
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+        }
+        
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            width: 100%;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            max-width: 70%;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        header h1 { 
+            font-size: 1.25rem; 
+            color: var(--accent-color);
+            transition: transform 0.2s;
+            margin: 0;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1rem;
+            }
+            .logo-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-container {
+                max-width: 60%;
+            }
+            
+            header h1 {
+                font-size: 0.9rem;
+            }
+        }
+        
+        .header-actions { 
+            display: flex; 
+            gap: 0.5rem; 
+            align-items: center; 
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+        }
+        
+        #searchInput {
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all var(--animation-speed);
+            min-height: 44px;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            #searchInput {
+                font-size: 0.85rem;
+                padding: 0.625rem 0.875rem;
+                min-width: 100px;
+                max-width: 150px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #searchInput {
+                min-width: 80px;
+                max-width: 120px;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .theme-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all var(--animation-speed);
+            flex-shrink: 0;
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        @media (max-width: 480px) {
+            .theme-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        .theme-btn:hover {
+            background: var(--bg-secondary);
+        }
+        
+        .theme-btn:active {
+            transform: rotate(15deg);
+        }
+        
+        .icon-light, .icon-dark { 
+            transition: opacity 0.3s;
+        }
+        
+        [data-theme="dark"] .icon-light { display: none; }
+        [data-theme="light"] .icon-dark { display: none; }
+        
+        .mobile-menu-btn {
+            display: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mobile-menu-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        nav { 
+            display: flex; 
+            gap: 0.5rem; 
+            flex-wrap: wrap;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 0.5rem;
+                max-height: 0;
+                overflow: hidden;
+                opacity: 0;
+                padding: 0;
+            }
+            
+            nav.show {
+                max-height: 500px;
+                opacity: 1;
+                padding-top: 1rem;
+            }
+        }
+        
+        nav a {
+            padding: 0.625rem 1rem;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            transition: all var(--animation-speed);
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            nav a {
+                width: 100%;
+                text-align: left;
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+        
+        nav a:hover {
+            color: var(--accent-color);
+            border-color: var(--border-color);
+        }
+        
+        nav a.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        .premium-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+            margin-left: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 480px) {
+            .premium-badge {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.4rem;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* ===== HELPER BUTTONS (PERBAIKAN UNTUK MOBILE) ===== */
+        .helper-btn {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all var(--animation-speed);
+            margin: 1rem 0;
+            text-decoration: none;
+            width: 100%;
+            min-height: 50px;
+            box-shadow: var(--shadow);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        @media (max-width: 480px) {
+            .helper-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                min-height: 48px;
+            }
+        }
+        
+        .helper-btn:active {
+            transform: scale(0.98);
+            background: #e69a0a;
+        }
+        
+        .helper-btn i {
+            font-size: 1.2rem;
+        }
+        
+        .helper-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--warning-color);
+            animation: slideInDown 0.4s ease-out;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .helper-section {
+                padding: 1.25rem;
+                margin: 1rem 0;
+            }
+        }
+        
+        .helper-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--warning-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 480px) {
+            .helper-title {
+                font-size: 1.1rem;
+            }
+        }
+        
+        .helper-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .helper-content ol {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .helper-content li {
+            margin-bottom: 0.75rem;
+            padding-left: 0.5rem;
+        }
+        
+        .helper-content strong {
+            color: var(--text-primary);
+        }
+
+        /* ===== REAL LOGOS FOR WHATSAPP/TELEGRAM ===== */
+        .logo-whatsapp {
+            color: var(--whatsapp-green);
+            font-size: 1.5rem;
+        }
+        
+        .logo-telegram {
+            color: var(--telegram-blue);
+            font-size: 1.5rem;
+        }
+        
+        .logo-ai {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+        
+        .logo-shield {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .logo-lock {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        /* ===== CAROUSEL MOBILE OPTIMIZED ===== */
+        .carousel-section { 
+            margin: 1.5rem 0; 
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-section {
+                margin: 1rem 0;
+            }
+        }
+        
+        .carousel {
+            position: relative;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            min-height: 180px;
+            animation: slideInUp 0.6s ease-out;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .carousel {
+                border-radius: 12px;
+                min-height: 150px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel {
+                min-height: 130px;
+            }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .carousel-track { 
+            position: relative; 
+            width: 100%; 
+            height: 180px; 
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-track {
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel-track {
+                height: 130px;
+            }
+        }
+        
+        .carousel-item {
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-item {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel-item {
+                padding: 0.75rem;
+            }
+        }
+        
+        .carousel-item.active { 
+            opacity: 1; 
+        }
+        
+        .carousel-item h3 { 
+            font-size: 1.5rem; 
+            margin-bottom: 0.5rem; 
+            color: var(--accent-color); 
+            line-height: 1.3;
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-item h3 {
+                font-size: 1.2rem;
+                margin-bottom: 0.25rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel-item h3 {
+                font-size: 1rem;
+            }
+        }
+        
+        .carousel-item p { 
+            font-size: 1rem; 
+            color: var(--text-secondary); 
+            max-width: 100%;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-item p {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel-item p {
+                font-size: 0.8rem;
+            }
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+            border-radius: 8px;
+            transition: background var(--animation-speed);
+            z-index: 10;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            min-width: 36px;
+        }
+        
+        @media (max-width: 768px) {
+            .carousel-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+                padding: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .carousel-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        .carousel-btn:hover { 
+            background: rgba(0, 0, 0, 0.5); 
+        }
+        
+        .carousel-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .carousel-btn.prev { left: 0.5rem; }
+        .carousel-btn.next { right: 0.5rem; }
+        
+        .carousel-dots {
+            position: absolute;
+            bottom: 0.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all var(--animation-speed);
+        }
+        
+        .carousel-dot.active { 
+            background: white; 
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        /* ===== PROMPTS GRID MOBILE OPTIMIZED ===== */
+        .prompts-section { 
+            margin: 2rem 0; 
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .prompts-section {
+                margin: 1.5rem 0;
+            }
+        }
+        
+        .prompts-section h2 { 
+            font-size: 1.5rem; 
+            margin-bottom: 1.25rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .prompts-section h2 {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .prompts-section h2 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        .prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .prompts-grid {
+                grid-template-columns: 1fr;
+                gap: 0.875rem;
+            }
+        }
+        
+        .prompt-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            transition: all var(--animation-speed);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease-out forwards;
+            animation-delay: calc(var(--card-index, 0) * 0.1s);
+            -webkit-touch-callout: none;
+            user-select: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .prompt-card {
+                padding: 1rem;
+                border-radius: 10px;
+                margin: 0;
+            }
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .prompt-card:active {
+            transform: scale(0.98);
+            box-shadow: var(--shadow-mobile);
+        }
+        
+        .prompt-card h3 { 
+            font-size: 1.1rem; 
+            margin-bottom: 0.75rem; 
+            color: var(--text-primary);
+            line-height: 1.4;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 480px) {
+            .prompt-card h3 {
+                font-size: 1rem;
+            }
+        }
+        
+        .prompt-meta { 
+            display: flex; 
+            gap: 0.5rem; 
+            flex-wrap: wrap; 
+            margin-bottom: 0.75rem; 
+        }
+        
+        .ai-tag {
+            padding: 0.25rem 0.5rem;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            white-space: nowrap;
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .free-tag {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .prompt-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 480px) {
+            .prompt-card p {
+                font-size: 0.85rem;
+                -webkit-line-clamp: 2;
+            }
+        }
+        
+        .prompt-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .rating { 
+            color: #fbbf24; 
+            font-size: 1rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.25rem; 
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 480px) {
+            .rating {
+                font-size: 0.9rem;
+            }
+        }
+        
+        .rating-count { 
+            color: var(--text-secondary); 
+            font-size: 0.75rem; 
+            margin-left: 0.25rem; 
+        }
+        
+        .btn-copy {
+            background: var(--accent-color);
+            color: white;
+            min-height: 36px;
+            min-width: 80px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .btn-copy:hover { 
+            background: var(--accent-hover);
+        }
+        
+        .btn-buy {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            min-height: 36px;
+            min-width: 80px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .btn-buy:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        /* ===== EMPTY STATES ===== */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+            animation: fadeIn 0.8s ease-out;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .empty-state {
+                padding: 1.5rem 0.75rem;
+            }
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+        
+        .empty-state p {
+            max-width: 100%;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* ===== COMMUNITY PAGE ===== */
+        .community-section { 
+            margin: 2rem 0; 
+            width: 100%;
+        }
+        
+        .community-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .community-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        .community-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all var(--animation-speed);
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease-out forwards;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .community-card {
+                padding: 1.25rem;
+                border-radius: 12px;
+            }
+        }
+        
+        .community-card:nth-child(1) { animation-delay: 0.1s; }
+        .community-card:nth-child(2) { animation-delay: 0.2s; }
+        .community-card:nth-child(3) { animation-delay: 0.3s; }
+        
+        .community-card:active {
+            transform: scale(0.98);
+            box-shadow: var(--shadow-mobile);
+        }
+        
+        .community-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (max-width: 480px) {
+            .community-icon {
+                font-size: 2rem;
+                height: 50px;
+            }
+        }
+        
+        .community-card h3 { 
+            font-size: 1.3rem; 
+            margin-bottom: 0.75rem; 
+            color: var(--accent-color); 
+            font-weight: 600;
+        }
+        
+        @media (max-width: 480px) {
+            .community-card h3 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        .community-card p { 
+            color: var(--text-secondary); 
+            margin-bottom: 1.5rem; 
+            line-height: 1.6; 
+            font-size: 0.9rem;
+        }
+        
+        .btn-join {
+            padding: 0.75rem 1.25rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--animation-speed);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            min-height: 44px;
+            min-width: 160px;
+        }
+        
+        @media (max-width: 480px) {
+            .btn-join {
+                padding: 0.625rem 1rem;
+                font-size: 0.85rem;
+                min-width: 140px;
+            }
+        }
+        
+        .btn-join:hover { 
+            background: var(--accent-hover);
+        }
+
+        /* ===== PREMIUM PAGE ===== */
+        .premium-section { 
+            margin: 2rem 0; 
+            width: 100%;
+        }
+        
+        .premium-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            padding: 2rem;
+            color: white;
+            box-shadow: var(--shadow-hover);
+            max-width: 100%;
+            margin: 0 auto;
+            animation: scaleIn 0.6s ease-out;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .premium-card {
+                padding: 1.5rem;
+                border-radius: 14px;
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .premium-card h2 { 
+            font-size: 1.75rem; 
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            .premium-card h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        .premium-price {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1.25rem 0;
+            color: #fbbf24;
+        }
+        
+        @media (max-width: 768px) {
+            .premium-price {
+                font-size: 1.75rem;
+            }
+        }
+        
+        .premium-features {
+            list-style: none;
+            margin: 1.5rem 0;
+            padding: 0;
+        }
+        
+        .premium-features li {
+            padding: 0.625rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .premium-features li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        
+        .btn-premium {
+            padding: 0.875rem 2rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--animation-speed);
+            display: inline-block;
+            text-decoration: none;
+            min-height: 52px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-premium {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+                min-height: 48px;
+                max-width: 100%;
+            }
+        }
+        
+        .btn-premium:active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        /* ===== PAYMENT MODAL ===== */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 16px;
+            backdrop-filter: blur(3px);
+            /* Safe area untuk mobile */
+            padding-top: max(16px, env(safe-area-inset-top));
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+        
+        .payment-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .payment-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 90vw;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            transform: translateY(-30px);
+            opacity: 0;
+            transition: all 0.3s ease 0.1s;
+            border: 1px solid var(--border-color);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-content {
+                padding: 1.25rem;
+                border-radius: 14px;
+                max-width: 95vw;
+            }
+        }
+        
+        .payment-modal.show .payment-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .payment-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.25rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .contact-method {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .contact-method h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .password-input {
+            position: relative;
+            margin: 1.25rem 0;
+        }
+        
+        .password-input input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            font-family: monospace;
+            min-height: 48px;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            min-width: 40px;
+        }
+
+        /* ===== DETAIL PAGE ===== */
+        .prompt-detail {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow);
+            animation: slideInUp 0.5s ease-out;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .prompt-detail {
+                padding: 1.25rem;
+                border-radius: 12px;
+                margin: 1rem 0;
+            }
+        }
+        
+        .detail-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+        }
+        
+        .detail-header h1 { 
+            font-size: 1.5rem; 
+            margin-bottom: 0.75rem; 
+            line-height: 1.3;
+            font-weight: 600;
+            word-wrap: break-word;
+        }
+        
+        @media (max-width: 768px) {
+            .detail-header h1 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        .detail-info { 
+            margin-bottom: 1.5rem; 
+            padding: 1.25rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease-out;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .detail-info {
+                padding: 1rem;
+            }
+        }
+        
+        .detail-info h3 { 
+            font-size: 1.1rem; 
+            margin-bottom: 0.5rem; 
+            color: var(--accent-color); 
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .prompt-text-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+            position: relative;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .prompt-text-container {
+                padding: 1rem;
+            }
+        }
+        
+        .prompt-text {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .btn-copy-large {
+            padding: 0.875rem 1.5rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all var(--animation-speed);
+            display: block;
+            margin: 1.25rem auto;
+            font-weight: 500;
+            min-height: 48px;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-copy-large {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.95rem;
+            }
+        }
+        
+        .btn-copy-large:hover { 
+            background: var(--accent-hover);
+        }
+        
+        .btn-back {
+            padding: 0.75rem 1.25rem;
+            background: var(--text-secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+        }
+        
+        .btn-back:hover { 
+            opacity: 0.8;
+        }
+
+        /* ===== UPLOAD PAGE OPTIMIZED ===== */
+        .upload-section {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow);
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            animation: slideInUp 0.5s ease-out;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .upload-section {
+                padding: 1.25rem;
+                border-radius: 12px;
+                margin: 1rem 0;
+            }
+        }
+        
+        .upload-section h2 { 
+            font-size: 1.5rem; 
+            margin-bottom: 0.5rem; 
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .upload-section h2 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        .info-text { 
+            color: var(--text-secondary); 
+            margin-bottom: 1.5rem; 
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .upload-form { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1.25rem; 
+            width: 100%;
+        }
+        
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            width: 100%;
+        }
+        
+        .form-group label { 
+            font-weight: 600; 
+            margin-bottom: 0.5rem; 
+            color: var(--text-primary); 
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select,
+        .form-group input[type="number"],
+        .form-group input[type="password"] {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all var(--animation-speed);
+            min-height: 46px;
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        @media (max-width: 768px) {
+            .form-group input[type="text"],
+            .form-group textarea,
+            .form-group select,
+            .form-group input[type="number"],
+            .form-group input[type="password"] {
+                padding: 0.625rem;
+                font-size: 0.9rem;
+                min-height: 44px;
+            }
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .char-count {
+            position: absolute;
+            right: 0.75rem;
+            bottom: 0.75rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        
+        .ai-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .ai-checkboxes {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+        }
+        
+        .ai-checkboxes label {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-size: 0.85rem;
+            min-height: 36px;
+        }
+        
+        .ai-checkboxes label:hover {
+            background: var(--bg-secondary);
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: normal;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            min-height: 24px;
+        }
+        
+        .price-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        
+        .price-input input {
+            width: 160px;
+            padding: 0.75rem;
+        }
+        
+        @media (max-width: 768px) {
+            .price-input {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .price-input input {
+                width: 100%;
+            }
+        }
+        
+        .encryption-info {
+            background: var(--bg-secondary);
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin: 1.25rem 0;
+            border-left: 4px solid var(--accent-color);
+            animation: slideInRight 0.5s ease-out;
+            width: 100%;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .encryption-info h4 {
+            margin-bottom: 0.75rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .encryption-info ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .encryption-info li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .encryption-info li::before {
+            content: "✓";
+            color: var(--accent-color);
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        
+        .btn-submit {
+            padding: 0.875rem 1.5rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--animation-speed);
+            font-weight: 600;
+            margin-top: 1rem;
+            min-height: 50px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .btn-submit:hover { 
+            background: var(--accent-hover);
+        }
+        
+        .btn-submit:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .upload-message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1.25rem;
+            text-align: center;
+            font-weight: 500;
+            animation: slideInUp 0.3s ease-out;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        .upload-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid var(--success-color);
+        }
+        
+        .upload-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid var(--error-color);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-secondary);
+            animation: fadeIn 0.8s ease-out;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            footer {
+                padding: 1.25rem 0;
+                margin-top: 2rem;
+            }
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-links {
+                gap: 1rem;
+                flex-direction: row;
+            }
+        }
+        
+        .footer-links a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            position: relative;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== TOUCH OPTIMIZATIONS ===== */
+        @media (hover: none) {
+            .btn:hover, 
+            .btn-copy:hover, 
+            .btn-buy:hover, 
+            .btn-join:hover,
+            .btn-submit:hover,
+            .btn-premium:hover,
+            .btn-back:hover,
+            .theme-btn:hover,
+            nav a:hover {
+                transform: none;
+            }
+            
+            .btn:active, 
+            .btn-copy:active, 
+            .btn-buy:active, 
+            .btn-join:active,
+            .btn-submit:active,
+            .btn-premium:active,
+            .btn-back:active,
+            .theme-btn:active,
+            nav a:active {
+                transform: scale(0.97);
+                opacity: 0.9;
+            }
+            
+            .carousel-btn:hover {
+                background: rgba(0, 0, 0, 0.3);
+            }
+            
+            .carousel-btn:active {
+                background: rgba(0, 0, 0, 0.5);
+                transform: translateY(-50%) scale(0.95);
+            }
+            
+            .prompt-card:hover {
+                transform: none;
+                box-shadow: var(--shadow);
+            }
+            
+            .community-card:hover {
+                transform: none;
+                box-shadow: var(--shadow);
+            }
+        }
+
+        /* ===== SAFARI SPECIFIC FIXES ===== */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                padding-left: max(8px, env(safe-area-inset-left));
+                padding-right: max(8px, env(safe-area-inset-right));
+            }
+            
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            .carousel-track {
+                height: auto;
+                min-height: 150px;
+            }
+            
+            /* Fix untuk input di iOS */
+            input, textarea, select {
+                font-size: 16px !important; /* Mencegah zoom otomatis di iOS */
+            }
+            
+            /* Fix untuk tombol di iOS */
+            button {
+                cursor: pointer;
+            }
+        }
+
+        /* ===== FIX UNTUK MOBILE LAYOUT ===== */
+        @media (max-width: 768px) {
+            /* Perbaikan spacing untuk mobile */
+            .page-container {
+                padding: 0;
+                margin: 0;
+            }
+            
+            /* Pastikan elemen tidak melebihi lebar layar */
+            img, video, iframe {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            /* Perbaikan untuk form di mobile */
+            input, textarea, select {
+                font-size: 16px; /* Mencegah zoom di iOS */
+            }
+            
+            /* Tombol lebih besar untuk mobile */
+            button, .btn, a[role="button"] {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+
+        /* ===== HAMBURGER MENU ANIMATION ===== */
+        .mobile-menu-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu-btn.active i {
+            transform: rotate(90deg);
+        }
+
+        /* ===== PERBAIKAN UNTUK MOBILE MENU ANIMASI ===== */
+        @media (max-width: 768px) {
+            nav {
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                transform-origin: top;
+            }
+            
+            nav.show {
+                transform: translateY(0);
+                padding-top: 1rem;
+            }
+            
+            .mobile-menu-btn i {
+                transition: transform 0.3s ease;
+            }
+            
+            .mobile-menu-btn.active i {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Alert System -->
+    <div id="customAlert" class="alert-overlay">
+        <div class="alert-box">
+            <div class="alert-title">
+                <span class="alert-icon" id="alertIcon">✓</span>
+                <span id="alertTitle">Berhasil</span>
+            </div>
+            <p id="alertMessage" class="alert-message"></p>
+            <div class="alert-actions">
+                <button onclick="hideAlert()" class="btn btn-alert btn-alert-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="payment-modal">
+        <div class="payment-content">
+            <h3>
+                <div class="logo-shield">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                Beli Prompt Premium
+            </h3>
+            
+            <div id="paymentInfo"></div>
+            
+            <div class="password-input">
+                <input type="password" id="promptPassword" placeholder="Masukkan password dari penjual" autocomplete="off">
+                <button type="button" class="toggle-password" onclick="togglePassword()">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            
+            <div class="alert-message" id="passwordHint">
+                Password diberikan oleh penjual setelah pembayaran berhasil.
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                <button onclick="decryptPrompt()" class="btn" style="flex: 1; min-width: 140px; background: var(--accent-color); color: white; min-height: 48px;">
+                    <div class="logo-lock">
+                        <i class="fas fa-lock-open"></i>
+                    </div>
+                    Decrypt Prompt
+                </button>
+                <button onclick="hidePaymentModal()" class="btn" style="background: var(--text-secondary); color: white; min-width: 100px; min-height: 48px;">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="logo-container" onclick="navigateTo('home')">
+                        <div class="logo-ai">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h1>
+                            Perpustakaan Prompt AI 
+                            <span class="premium-badge">SouGPT</span>
+                        </h1>
+                    </div>
+                    
+                    <div class="header-actions">
+                        <input type="text" id="searchInput" placeholder="Cari prompt...">
+                        <button id="themeToggle" class="theme-btn">
+                            <span class="icon-light"><i class="fas fa-sun"></i></span>
+                            <span class="icon-dark"><i class="fas fa-moon"></i></span>
+                        </button>
+                        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <nav id="mainNav">
+                    <a onclick="navigateTo('home')" id="navHome" class="active">
+                        <i class="fas fa-home"></i>
+                        Beranda
+                    </a>
+                    <a onclick="navigateTo('premium')" id="navPremium">
+                        <i class="fas fa-crown"></i>
+                        Premium
+                    </a>
+                    <a onclick="navigateTo('upload')" id="navUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Upload Prompt
+                    </a>
+                    <a onclick="navigateTo('community')" id="navCommunity">
+                        <i class="fas fa-users"></i>
+                        Komunitas
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- HOME PAGE -->
+        <div id="homePage" class="page-container active container">
+            <section class="carousel-section">
+                <div class="carousel">
+                    <div class="carousel-track">
+                        <div class="carousel-item active">
+                            <h3>Selamat Datang di Perpustakaan Prompt AI</h3>
+                            <p>Temukan dan bagikan prompt AI terbaik untuk berbagai kebutuhan</p>
+                        </div>
+                        <div class="carousel-item">
+                            <h3>Dikelola oleh Komunitas SouGPT</h3>
+                            <p>Platform berbagi prompt yang dikembangkan dan dikelola oleh komunitas</p>
+                        </div>
+                        <div class="carousel-item">
+                            <h3>Jual atau Berbagi Prompt Anda</h3>
+                            <p>Upload prompt Anda dan tetapkan harga atau bagikan gratis ke komunitas</p>
+                        </div>
+                    </div>
+                    <button class="carousel-btn prev" onclick="carouselPrev()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-btn next" onclick="carouselNext()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="carousel-dots" id="carouselDots"></div>
+                </div>
+            </section>
+
+            <section class="prompts-section">
+                <h2>
+                    <i class="fas fa-bolt"></i>
+                    Prompt Terbaru
+                </h2>
+                <div id="loadingPrompts" class="loading">Memuat prompt...</div>
+                <div id="promptsGrid" class="prompts-grid hidden"></div>
+                <div id="noPrompts" class="hidden">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <div class="logo-ai" style="font-size: 4rem; width: 80px; height: 80px;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                        </div>
+                        <h3>Belum ada prompt yang diupload</h3>
+                        <p>Jadilah yang pertama membagikan prompt AI Anda ke komunitas!</p>
+                        <button class="btn" onclick="navigateTo('upload')" style="padding: 0.875rem 2rem; font-size: 1rem; background: var(--accent-color); color: white; min-height: 48px; width: 100%; max-width: 300px; margin: 0 auto;">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Upload Prompt Pertama
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PREMIUM PAGE -->
+        <div id="premiumPage" class="page-container container hidden">
+            <section class="premium-section">
+                <div class="premium-card">
+                    <h2>SouGPT Prompt Pack</h2>
+                    <p style="color: #94a3b8; font-size: 1rem; margin-bottom: 1.25rem; line-height: 1.6;">
+                        Koleksi eksklusif prompt premium yang telah dioptimasi untuk hasil terbaik
+                    </p>
+                    
+                    <div class="premium-price">Rp 25.000</div>
+                    
+                    <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        Setelah pembayaran berhasil, Anda akan menerima file ZIP berisi:
+                    </p>
+                    
+                    <ul class="premium-features">
+                        <li>Prompt jailbreak premium untuk berbagai AI</li>
+                        <li>Ajaran khusus untuk menjailbreak AI lengkap</li>
+                        <li>Template untuk jailbreak prompt,ada 20+ template</li>
+                        <li>Free Update Selama 2 Bulan Penuh</li>
+                        <li>Akses tanpa batas ke AI</li>
+                        <li>Mendapatkan prompt pribadi admin</li>
+                        <li>Akses ke AI pembantu generate prompt jailbreak</li>
+                        <li>Mendapatkan informasi update dan celah terbaru.</li>
+                    </ul>
+                    
+                    <p style="color: #fbbf24; font-weight: 600; margin: 1.5rem 0; line-height: 1.6; font-size: 0.95rem;">
+                        <i class="fas fa-gift"></i> Bonus: Kasih sayang atmin🥰
+                    </p>
+                    
+                    <button onclick="buyPremium()" class="btn-premium">
+                        <i class="fas fa-shopping-cart"></i>
+                        Beli Sekarang
+                    </button>
+                    
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 1.5rem; line-height: 1.6;">
+                        <i class="fas fa-info-circle"></i> Pembayaran via transfer e-wallet, atau QRIS. Akses instan setelah pembayaran.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- COMMUNITY PAGE -->
+        <div id="communityPage" class="page-container container hidden">
+            <section class="community-section">
+                <h2>
+                    <i class="fas fa-users"></i>
+                    Komunitas SouGPT
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.6;">
+                    Bergabung dengan komunitas. Berbagi ilmu, kolaborasi, dan dapatkan insight terbaru tentang AI.
+                </p>
+                
+                <div class="community-grid">
+                    <div class="community-card" onclick="openCommunityLink('whatsapp-group')">
+                        <div class="community-icon">
+                            <i class="fab fa-whatsapp" style="font-size: 2.5rem; color: var(--whatsapp-green);"></i>
+                        </div>
+                        <h3>Group Chat SouGPT</h3>
+                        <p>Diskusi real-time dengan anggota komunitas, tanya jawab, dan berbagi pengalaman menggunakan AI</p>
+                        <button class="btn-join">
+                            <i class="fab fa-whatsapp"></i>
+                            Gabung Group Chat
+                        </button>
+                    </div>
+                    
+                    <div class="community-card" onclick="openCommunityLink('whatsapp-channel')">
+                        <div class="community-icon">
+                            <i class="fab fa-whatsapp" style="font-size: 2.5rem; color: #075E54;"></i>
+                        </div>
+                        <h3>Channel WhatsApp</h3>
+                        <p>Update harian tentang AI, tips & trik, dan pengumuman resmi dari komunitas SouGPT</p>
+                        <button class="btn-join">
+                            <i class="fab fa-whatsapp"></i>
+                            Gabung Channel
+                        </button>
+                    </div>
+                    
+                    <div class="community-card" onclick="openCommunityLink('telegram')">
+                        <div class="community-icon">
+                            <i class="fab fa-telegram" style="font-size: 2.5rem; color: var(--telegram-blue);"></i>
+                        </div>
+                        <h3>Telegram Community</h3>
+                        <p>Forum diskusi yang lebih terstruktur dengan berbagai channel untuk topik spesifik</p>
+                        <button class="btn-join">
+                            <i class="fab fa-telegram"></i>
+                            Gabung Telegram
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2.5rem; color: var(--text-secondary);">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem; font-size: 1.2rem;">
+                        <i class="fas fa-info-circle"></i>
+                        Tentang SouGPT
+                    </h3>
+                    <p style="max-width: 100%; margin: 0 auto; line-height: 1.6; font-size: 0.95rem;">
+                        SouGPT adalah komunitas independen yang fokus pada pengembangan dan pemanfaatan AI untuk berbagai kebutuhan. 
+                        Platform ini sepenuhnya dikelola dan dikembangkan oleh anggota komunitas untuk berbagi pengetahuan dan prompt AI.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- DETAIL PAGE -->
+        <div id="detailPage" class="page-container container hidden">
+            <div id="promptDetail" class="prompt-detail"></div>
+        </div>
+
+        <!-- UPLOAD PAGE -->
+        <div id="uploadPage" class="page-container container hidden">
+            <section class="upload-section">
+                <h2>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload Prompt Baru
+                </h2>
+                
+                <!-- Helper Button yang JELAS dan BESAR - FIXED -->
+                <button onclick="showUploadTutorial()" class="helper-btn" id="helperBtn">
+                    <i class="fas fa-question-circle"></i>
+                    Lihat Tutorial Upload (Step-by-Step)
+                </button>
+                
+                <p class="info-text">Prompt Anda akan divalidasi terlebih dahulu sebelum ditampilkan secara publik. Anda bisa menjual atau membagikan gratis.</p>
+                
+                <!-- Helper Section -->
+                <div id="uploadTutorial" class="helper-section" style="display: none;">
+                    <div class="helper-title">
+                        <i class="fas fa-graduation-cap"></i>
+                        Tutorial Upload Prompt
+                    </div>
+                    <div class="helper-content">
+                        <ol>
+                            <li><strong>Isi Nama Prompt:</strong> Beri nama yang jelas dan deskriptif (maks 100 karakter)</li>
+                            <li><strong>Pilih AI yang Didukung:</strong> Centang semua AI yang kompatibel dengan prompt Anda</li>
+                            <li><strong>Tulis Deskripsi:</strong> Jelaskan kegunaan prompt secara detail (maks 9000 karakter)</li>
+                            <li><strong>Masukkan Isi Prompt:</strong> Tulis prompt lengkap dengan format yang baik (maks 100.000 karakter)</li>
+                            <li><strong>Pilih Tipe Harga:</strong> Gratis (berbagi) atau Berbayar (jual)</li>
+                            <li><strong>Jika Berbayar:</strong> Tentukan harga dan kontak penjual (WhatsApp/Telegram)</li>
+                            <li><strong>Sistem akan otomatis mengenkripsi prompt</strong> dengan password yang di-generate sistem</li>
+                            <li><strong>Password akan ditampilkan 1x</strong> - Simpan baik-baik untuk diberikan ke pembeli</li>
+                            <li><strong>Upload dan tunggu validasi</strong> dari sistem (maks 5 menit)</li>
+                        </ol>
+                        <p style="color: var(--accent-color); font-weight: 500; margin-top: 1rem;">
+                            <i class="fas fa-shield-alt"></i> Sistem enkripsi otomatis menjaga keamanan prompt Anda!
+                        </p>
+                    </div>
+                </div>
+                
+                <form id="uploadForm" class="upload-form">
+                    <div class="form-group">
+                        <label for="promptName">
+                            <i class="fas fa-heading"></i>
+                            Nama Prompt *
+                        </label>
+                        <input type="text" id="promptName" maxlength="100" required placeholder="Contoh: Asisten Coding Python">
+                        <span class="char-count">0/100</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aiSupport">
+                            <i class="fas fa-robot"></i>
+                            AI yang Didukung *
+                        </label>
+                        <div class="ai-checkboxes">
+                            <label><input type="checkbox" value="DeepSeek"> DeepSeek</label>
+                            <label><input type="checkbox" value="Claude"> Claude</label>
+                            <label><input type="checkbox" value="ChatGPT"> ChatGPT</label>
+                            <label><input type="checkbox" value="Grok"> Grok</label>
+                            <label><input type="checkbox" value="Gemini"> Gemini</label>
+                            <label><input type="checkbox" value="Copilot"> Copilot</label>
+                            <label><input type="checkbox" value="Mistral"> Mistral</label>
+                            <label><input type="checkbox" value="Perplexity"> Perplexity</label>
+                        </div>
+                        <input type="text" id="customAI" placeholder="Atau tulis nama AI lainnya...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">
+                            <i class="fas fa-align-left"></i>
+                            Deskripsi *
+                        </label>
+                        <textarea id="description" rows="4" maxlength="9000" required placeholder="Jelaskan kegunaan prompt ini secara detail..."></textarea>
+                        <span class="char-count">0/9000</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promptContent">
+                            <i class="fas fa-file-alt"></i>
+                            Isi Prompt *
+                        </label>
+                        <textarea id="promptContent" rows="8" maxlength="100000" required placeholder="Tulis prompt lengkap di sini..."></textarea>
+                        <span class="char-count">0/100000</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="priceType">
+                            <i class="fas fa-tag"></i>
+                            Tipe Harga
+                        </label>
+                        <select id="priceType" onchange="togglePriceInput()">
+                            <option value="free">Gratis (Berbagi ke komunitas)</option>
+                            <option value="paid">Berbayar (Jual prompt)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="priceInputGroup" style="display: none;">
+                        <label for="price">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Harga (Rp) *
+                        </label>
+                        <div class="price-input">
+                            <input type="number" id="price" min="1000" max="1000000" placeholder="25000" step="1000">
+                            <span style="color: var(--text-secondary); font-size: 0.8rem;">Minimal Rp 1.000</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="sellerContactGroup" style="display: none;">
+                        <label for="sellerContact">
+                            <i class="fab fa-whatsapp"></i>
+                            Kontak Penjual *
+                        </label>
+                        <input type="text" id="sellerContact" placeholder="Contoh: WhatsApp: +6281234567890">
+                        <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.25rem;">
+                            Kontak Anda akan ditampilkan untuk pembeli
+                        </span>
+                    </div>
+
+                    <div id="encryptionInfo" class="encryption-info">
+                        <h4>
+                            <i class="fas fa-shield-alt"></i>
+                            Sistem Keamanan Enkripsi Otomatis
+                        </h4>
+                        <ul>
+                            <li>Sistem akan otomatis mengenkripsi prompt Anda dengan password yang aman</li>
+                            <li>Password di-generate secara random oleh sistem (bukan buatan user)</li>
+                            <li>Password hanya ditampilkan 1x saat upload berhasil - SCREENSHOT atau COPY!</li>
+                            <li>Simpan password dengan baik untuk diberikan ke pembeli</li>
+                            <li>Pembeli perlu password untuk mendekripsi prompt</li>
+                            <li>Sistem tidak menyimpan password - Anda bertanggung jawab untuk menyimpannya</li>
+                        </ul>
+                        <p style="color: var(--accent-color); font-weight: 500; margin-top: 1rem; font-size: 0.9rem;">
+                            <i class="fas fa-exclamation-triangle"></i> PENTING: Password HANYA muncul 1x saat upload sukses!
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="creator">
+                            <i class="fas fa-user"></i>
+                            Pembuat Prompt
+                        </label>
+                        <input type="text" id="creator" placeholder="Nama Anda (opsional)">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="isAnonymous"> Tampilkan sebagai Anonim
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Upload Prompt
+                    </button>
+                </form>
+
+                <div id="uploadMessage" class="upload-message hidden"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Perpustakaan Prompt AI. Platform komunitas untuk berbagi prompt AI.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Dikelola dan dikembangkan oleh Komunitas SouGPT</p>
+            <div class="footer-links">
+                <a href="#" onclick="navigateTo('community')">
+                    <i class="fas fa-users"></i>
+                    Komunitas
+                </a>
+                <a href="#" onclick="navigateTo('premium')">
+                    <i class="fas fa-crown"></i>
+                    Premium
+                </a>
+                <a href="#" onclick="navigateTo('upload')">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload Prompt
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ===== GLOBAL STATE =====
+        let allPrompts = [];
+        let currentSlide = 0;
+        let currentPromptId = null;
+        let currentPaymentPrompt = null;
+        let generatedPassword = '';
+        let isMobile = window.innerWidth <= 768;
+
+        // ===== MOBILE DETECTION & HANDLING =====
+        function checkMobile() {
+            isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                document.body.classList.add('mobile');
+            } else {
+                document.body.classList.remove('mobile');
+                // Close mobile menu if open
+                const nav = document.getElementById('mainNav');
+                nav.classList.remove('show');
+                const menuBtn = document.getElementById('mobileMenuBtn');
+                menuBtn.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', checkMobile);
+        window.addEventListener('load', checkMobile);
+
+        // ===== MOBILE MENU TOGGLE FUNCTION =====
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mainNav');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            nav.classList.toggle('show');
+            menuBtn.classList.toggle('active');
+            
+            // Optional: Add animation feedback
+            menuBtn.style.transform = nav.classList.contains('show') ? 'rotate(90deg)' : 'rotate(0deg)';
+            
+            // Prevent body scroll when menu is open on mobile
+            if (nav.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close mobile menu when clicking a nav link (existing navigation)
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    const nav = document.getElementById('mainNav');
+                    const menuBtn = document.getElementById('mobileMenuBtn');
+                    
+                    nav.classList.remove('show');
+                    menuBtn.classList.remove('active');
+                    menuBtn.style.transform = 'rotate(0deg)';
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside (improved)
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                const nav = document.getElementById('mainNav');
+                const menuBtn = document.getElementById('mobileMenuBtn');
+                
+                if (nav.classList.contains('show') && 
+                    !nav.contains(e.target) && 
+                    !menuBtn.contains(e.target)) {
+                    nav.classList.remove('show');
+                    menuBtn.classList.remove('active');
+                    menuBtn.style.transform = 'rotate(0deg)';
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // ===== FIX UNTUK HELPER BUTTON =====
+        function showUploadTutorial() {
+            const tutorial = document.getElementById('uploadTutorial');
+            const helperBtn = document.getElementById('helperBtn');
+            
+            if (tutorial.style.display === 'none' || !tutorial.style.display) {
+                tutorial.style.display = 'block';
+                helperBtn.innerHTML = '<i class="fas fa-times"></i> Tutup Tutorial';
+                helperBtn.style.background = 'var(--text-secondary)';
+                
+                // Scroll ke tutorial section dengan smooth
+                setTimeout(() => {
+                    tutorial.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }, 100);
+            } else {
+                tutorial.style.display = 'none';
+                helperBtn.innerHTML = '<i class="fas fa-question-circle"></i> Lihat Tutorial Upload (Step-by-Step)';
+                helperBtn.style.background = 'var(--warning-color)';
+                
+                // Scroll kembali ke atas form
+                setTimeout(() => {
+                    document.querySelector('.upload-section').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start'
+                    });
+                }, 100);
+            }
+        }
+
+        // ===== ENCRYPTION FUNCTIONS (SISTEM OTOMATIS) =====
+        function generateSecurePassword() {
+            // Generate random password 16 karakter dengan kombinasi kompleks
+            const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            let password = '';
+            for (let i = 0; i < 16; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
+            }
+            generatedPassword = password;
+            return password;
+        }
+
+        function encryptPrompt(text) {
+            try {
+                const password = generateSecurePassword();
+                
+                // Simple XOR encryption (untuk demo)
+                // Di production, gunakan Web Crypto API
+                let encrypted = '';
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i) ^ password.charCodeAt(i % password.length);
+                    encrypted += String.fromCharCode(charCode);
+                }
+                
+                // Encode ke base64 untuk storage
+                const base64Encoded = btoa(encrypted);
+                
+                return {
+                    encryptedText: base64Encoded,
+                    password: password
+                };
+            } catch (error) {
+                console.error('Encryption error:', error);
+                return null;
+            }
+        }
+
+        function decryptPromptText(encryptedBase64, password) {
+            try {
+                // Decode dari base64
+                const decoded = atob(encryptedBase64);
+                
+                // XOR decryption
+                let decrypted = '';
+                for (let i = 0; i < decoded.length; i++) {
+                    const charCode = decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length);
+                    decrypted += String.fromCharCode(charCode);
+                }
+                
+                return decrypted;
+            } catch (error) {
+                console.error('Decryption error:', error);
+                return null;
+            }
+        }
+
+        // ===== HELPER FUNCTIONS =====
+        function animatePageTransition(fromPage, toPage) {
+            const fromElement = document.getElementById(fromPage);
+            const toElement = document.getElementById(toPage);
+            
+            if (fromElement) {
+                fromElement.classList.remove('active');
+                setTimeout(() => {
+                    fromElement.classList.add('hidden');
+                }, 300);
+            }
+            
+            setTimeout(() => {
+                toElement.classList.remove('hidden');
+                setTimeout(() => {
+                    toElement.classList.add('active');
+                }, 10);
+            }, fromElement ? 300 : 0);
+            
+            // Close mobile menu on navigation
+            if (isMobile) {
+                const nav = document.getElementById('mainNav');
+                const menuBtn = document.getElementById('mobileMenuBtn');
+                nav.classList.remove('show');
+                menuBtn.classList.remove('active');
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showAlert(title, message, type = 'success', icon = '') {
+            const alertBox = document.getElementById('customAlert');
+            const alertTitle = document.getElementById('alertTitle');
+            const alertMessage = document.getElementById('alertMessage');
+            const alertIcon = document.getElementById('alertIcon');
+            
+            alertBox.className = `alert-overlay alert-${type}`;
+            alertTitle.textContent = title;
+            alertMessage.textContent = message;
+            
+            // Set icon berdasarkan type
+            switch(type) {
+                case 'success':
+                    alertIcon.innerHTML = '<i class="fas fa-check"></i>';
+                    break;
+                case 'error':
+                    alertIcon.innerHTML = '<i class="fas fa-times"></i>';
+                    break;
+                case 'info':
+                    alertIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+                    break;
+                default:
+                    alertIcon.innerHTML = icon || '<i class="fas fa-info-circle"></i>';
+            }
+            
+            setTimeout(() => {
+                alertBox.classList.add('show');
+            }, 10);
+            
+            // Prevent body scroll when alert is shown
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideAlert() {
+            const alertBox = document.getElementById('customAlert');
+            alertBox.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function showPaymentModal(prompt) {
+            currentPaymentPrompt = prompt;
+            const modal = document.getElementById('paymentModal');
+            const paymentInfo = document.getElementById('paymentInfo');
+            
+            paymentInfo.innerHTML = `
+                <div class="contact-method">
+                    <h4>
+                        <i class="fab fa-whatsapp" style="color: var(--whatsapp-green);"></i>
+                        Hubungi Penjual:
+                    </h4>
+                    <p style="color: var(--text-primary); font-size: 1rem; margin: 0.5rem 0;">${escapeHtml(prompt.sellerContact)}</p>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem;">
+                        <i class="fas fa-info-circle"></i> Silakan hubungi penjual untuk pembayaran dan minta password prompt.
+                    </p>
+                </div>
+                <p style="color: var(--text-secondary); margin: 1.25rem 0; font-size: 0.95rem;">
+                    <strong style="color: var(--text-primary); font-size: 1.1rem;">${escapeHtml(prompt.nama)}</strong><br>
+                    Harga: <strong style="color: var(--accent-color); font-size: 1.2rem;">Rp ${prompt.price.toLocaleString()}</strong>
+                </p>
+            `;
+            
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hidePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('promptPassword');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            const toggleBtn = passwordInput.nextElementSibling;
+            
+            passwordInput.setAttribute('type', type);
+            toggleBtn.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        }
+
+        function decryptPrompt() {
+            const password = document.getElementById('promptPassword').value.trim();
+            if (!password) {
+                showAlert('Error', 'Masukkan password dari penjual', 'error');
+                return;
+            }
+
+            try {
+                const decrypted = decryptPromptText(currentPaymentPrompt.encryptedPrompt, password);
+                if (decrypted && decrypted !== '[ENCRYPTED]') {
+                    showAlert('Berhasil!', 'Prompt berhasil didekripsi', 'success');
+                    
+                    // Auto copy to clipboard
+                    setTimeout(() => {
+                        copyToClipboard(decrypted);
+                        showAlert(
+                            'Prompt Siap!', 
+                            'Prompt telah disalin ke clipboard Anda.\n\n' +
+                            'Gunakan prompt ini dengan bijak dan jangan bagikan ke orang lain tanpa izin penjual.',
+                            'info'
+                        );
+                        hidePaymentModal();
+                    }, 1500);
+                } else {
+                    showAlert('Error', 'Password salah atau prompt rusak', 'error');
+                }
+            } catch (error) {
+                showAlert('Error', 'Gagal mendekripsi prompt. Periksa password Anda.', 'error');
+            }
+        }
+
+        // ===== THEME MANAGEMENT =====
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Add animation feedback
+            themeToggle.style.transform = 'rotate(180deg)';
+            setTimeout(() => {
+                themeToggle.style.transform = 'rotate(0deg)';
+            }, 300);
+        });
+
+        // ===== NAVIGATION =====
+        function navigateTo(page) {
+            const pages = ['homePage', 'premiumPage', 'communityPage', 'detailPage', 'uploadPage'];
+            const navItems = ['navHome', 'navPremium', 'navUpload', 'navCommunity'];
+            
+            // Update active nav
+            navItems.forEach(nav => {
+                const element = document.getElementById(nav);
+                if (element) element.classList.remove('active');
+            });
+            
+            // Animate page transition
+            const currentPage = pages.find(p => !document.getElementById(p).classList.contains('hidden'));
+            animatePageTransition(currentPage, page + 'Page');
+            
+            // Set active nav
+            const navId = 'nav' + page.charAt(0).toUpperCase() + page.slice(1);
+            document.getElementById(navId)?.classList.add('active');
+            
+            // Load data if needed
+            if (page === 'home') {
+                setTimeout(loadPrompts, 300);
+            }
+            
+            // Reset helper button state jika navigasi dari upload page
+            if (currentPage === 'uploadPage') {
+                const helperBtn = document.getElementById('helperBtn');
+                if (helperBtn) {
+                    helperBtn.innerHTML = '<i class="fas fa-question-circle"></i> Lihat Tutorial Upload (Step-by-Step)';
+                    helperBtn.style.background = 'var(--warning-color)';
+                }
+            }
+        }
+
+        function openCommunityLink(type) {
+            const links = {
+                'whatsapp-group': 'https://chat.whatsapp.com/YOUR_GROUP_INVITE_LINK',
+                'whatsapp-channel': 'https://whatsapp.com/channel/0029VbBlIDBEquiOKETQXZ1B',
+                'telegram': 'https://t.me/YOUR_TELEGRAM_LINK'
+            };
+            
+            if (links[type]) {
+                if (type === 'whatsapp-channel') {
+                    // Channel WhatsApp sudah ada
+                    window.open(links[type], '_blank');
+                } else if (!links[type].includes('YOUR_')) {
+                    window.open(links[type], '_blank');
+                } else {
+                    showAlert('Info', 
+                        `Link ${type.replace('-', ' ')} belum diatur.\n\n` +
+                        `Hubungi admin SouGPT untuk mendapatkan link yang valid.`,
+                        'info'
+                    );
+                }
+            }
+        }
+
+        // ===== CAROUSEL =====
+        function initCarousel() {
+            const items = document.querySelectorAll('.carousel-item');
+            const dotsContainer = document.getElementById('carouselDots');
+            
+            items.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+
+            const carouselInterval = setInterval(() => {
+                const newIndex = currentSlide === items.length - 1 ? 0 : currentSlide + 1;
+                goToSlide(newIndex);
+            }, 5000);
+
+            // Pause carousel on hover/touch
+            const carousel = document.querySelector('.carousel');
+            carousel.addEventListener('mouseenter', () => clearInterval(carouselInterval));
+            carousel.addEventListener('mouseleave', () => {
+                setInterval(() => {
+                    const newIndex = currentSlide === items.length - 1 ? 0 : currentSlide + 1;
+                    goToSlide(newIndex);
+                }, 5000);
+            });
+        }
+
+        function goToSlide(index) {
+            const items = document.querySelectorAll('.carousel-item');
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            items[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            
+            currentSlide = index;
+            
+            items[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function carouselPrev() {
+            const items = document.querySelectorAll('.carousel-item');
+            const newIndex = currentSlide === 0 ? items.length - 1 : currentSlide - 1;
+            goToSlide(newIndex);
+        }
+
+        function carouselNext() {
+            const items = document.querySelectorAll('.carousel-item');
+            const newIndex = currentSlide === items.length - 1 ? 0 : currentSlide + 1;
+            goToSlide(newIndex);
+        }
+
+        // ===== LOAD PROMPTS =====
+        async function loadPrompts() {
+            const loadingEl = document.getElementById('loadingPrompts');
+            const grid = document.getElementById('promptsGrid');
+            const noPromptsEl = document.getElementById('noPrompts');
+            
+            loadingEl.classList.remove('hidden');
+            grid.classList.add('hidden');
+            noPromptsEl.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/prompts');
+                if (!response.ok) throw new Error('API error');
+                
+                allPrompts = await response.json();
+                allPrompts.sort((a, b) => b.timestamp - a.timestamp);
+                
+                setTimeout(() => {
+                    loadingEl.classList.add('hidden');
+                    
+                    if (allPrompts.length === 0) {
+                        noPromptsEl.classList.remove('hidden');
+                    } else {
+                        displayPrompts(allPrompts);
+                    }
+                }, 300);
+                
+            } catch (error) {
+                console.log('Gagal mengambil data:', error.message);
+                allPrompts = [];
+                setTimeout(() => {
+                    loadingEl.classList.add('hidden');
+                    noPromptsEl.classList.remove('hidden');
+                }, 300);
+            }
+        }
+
+        function displayPrompts(prompts) {
+            const grid = document.getElementById('promptsGrid');
+            grid.classList.remove('hidden');
+            grid.innerHTML = '';
+            
+            prompts.forEach((prompt, index) => {
+                const card = createPromptCard(prompt);
+                card.style.setProperty('--card-index', index);
+                grid.appendChild(card);
+            });
+        }
+
+        function createPromptCard(prompt) {
+            const card = document.createElement('div');
+            card.className = 'prompt-card';
+            card.onclick = () => showDetail(prompt.id);
+            
+            const aiTags = prompt.ai.slice(0, 3).map(ai => `<span class="ai-tag">${escapeHtml(ai)}</span>`).join('');
+            const moreAI = prompt.ai.length > 3 ? `<span class="ai-tag">+${prompt.ai.length - 3}</span>` : '';
+            const priceTag = prompt.priceType === 'paid' 
+                ? `<span class="price-tag">Rp ${prompt.price.toLocaleString()}</span>`
+                : `<span class="free-tag">Gratis</span>`;
+            
+            let ratingDisplay = '';
+            if (prompt.ratingCount > 0) {
+                const stars = '★'.repeat(Math.floor(prompt.rating)) + (prompt.rating % 1 >= 0.5 ? '☆' : '');
+                ratingDisplay = `
+                    <div class="rating">
+                        ${stars} ${prompt.rating.toFixed(1)}
+                        <span class="rating-count">(${prompt.ratingCount})</span>
+                    </div>
+                `;
+            } else {
+                ratingDisplay = `<div class="rating" style="color: var(--text-secondary);">Belum ada rating</div>`;
+            }
+            
+            card.innerHTML = `
+                <h3>${escapeHtml(prompt.nama)}</h3>
+                <div class="prompt-meta">
+                    ${aiTags}
+                    ${moreAI}
+                    ${priceTag}
+                </div>
+                <p>${escapeHtml(prompt.description)}</p>
+                <div class="prompt-footer">
+                    ${ratingDisplay}
+                    ${prompt.priceType === 'paid' 
+                        ? `<button class="btn btn-buy" onclick="event.stopPropagation(); showPaymentModal(${JSON.stringify(prompt).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-lock"></i>
+                            Beli
+                          </button>`
+                        : `<button class="btn btn-copy" onclick="event.stopPropagation(); copyPromptById('${prompt.id}')">
+                            <i class="fas fa-copy"></i>
+                            Salin
+                          </button>`
+                    }
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // ===== DETAIL PAGE =====
+        function showDetail(promptId) {
+            const prompt = allPrompts.find(p => p.id === promptId);
+            if (!prompt) return;
+
+            currentPromptId = promptId;
+            const detailContainer = document.getElementById('promptDetail');
+            
+            const aiTags = prompt.ai.map(ai => `<span class="ai-tag">${escapeHtml(ai)}</span>`).join('');
+            const priceTag = prompt.priceType === 'paid' 
+                ? `<span class="price-tag" style="font-size: 0.9rem;">Rp ${prompt.price.toLocaleString()}</span>`
+                : `<span class="free-tag" style="font-size: 0.9rem;">Gratis</span>`;
+            
+            const date = new Date(prompt.timestamp).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            let ratingDisplay = '';
+            if (prompt.ratingCount > 0) {
+                const stars = '★'.repeat(Math.floor(prompt.rating)) + (prompt.rating % 1 >= 0.5 ? '☆' : '');
+                ratingDisplay = `
+                    <div class="rating" style="font-size: 1.3rem;">
+                        ${stars} ${prompt.rating.toFixed(1)}
+                        <span class="rating-count" style="font-size: 0.9rem;">(${prompt.ratingCount} rating)</span>
+                    </div>
+                `;
+            } else {
+                ratingDisplay = `
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        Belum ada rating
+                    </div>
+                `;
+            }
+            
+            let promptContent = '';
+            if (prompt.priceType === 'paid') {
+                promptContent = `
+                    <div class="prompt-text-container">
+                        <div style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary);">
+                            <i class="fas fa-lock" style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem;">Prompt Terenkripsi</h4>
+                            <p style="font-size: 0.9rem;">Prompt ini dijual. Hubungi penjual untuk membeli dan mendapatkan password.</p>
+                            ${prompt.sellerContact ? `
+                                <div style="background: var(--bg-primary); padding: 1rem; border-radius: 8px; margin: 1rem 0; border: 1px solid var(--border-color);">
+                                    <p style="margin: 0; color: var(--text-primary); font-size: 0.95rem;">
+                                        <i class="fab fa-whatsapp" style="color: var(--whatsapp-green);"></i>
+                                        <strong>Kontak Penjual:</strong> ${escapeHtml(prompt.sellerContact)}
+                                    </p>
+                                </div>
+                            ` : ''}
+                            <button class="btn" onclick="showPaymentModal(${JSON.stringify(prompt).replace(/"/g, '&quot;')})" style="margin-top: 1rem; background: var(--accent-color); color: white; padding: 0.75rem 1.5rem; min-height: 44px; width: 100%; max-width: 200px;">
+                                <i class="fas fa-lock"></i>
+                                Beli Prompt
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                promptContent = `
+                    <div class="prompt-text-container">
+                        <pre class="prompt-text">${escapeHtml(prompt.prompt)}</pre>
+                    </div>
+                    <button class="btn-copy-large" onclick="copyCurrentPrompt()">
+                        <i class="fas fa-copy"></i>
+                        Salin ke Clipboard
+                    </button>
+                `;
+            }
+            
+            detailContainer.innerHTML = `
+                <button class="btn btn-back" onclick="navigateTo('home')">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali ke Beranda
+                </button>
+                <div class="detail-header">
+                    <h1>${escapeHtml(prompt.nama)}</h1>
+                    <div class="prompt-meta">
+                        ${aiTags}
+                        ${priceTag}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 1rem;">
+                        ${ratingDisplay}
+                        <span style="color: var(--text-secondary); font-size: 0.8rem;">
+                            Diupload oleh ${prompt.isAnonymous ? 'Anonymous' : escapeHtml(prompt.creator)}<br>
+                            ${date}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="detail-info">
+                    <h3>
+                        <i class="fas fa-align-left"></i>
+                        Deskripsi
+                    </h3>
+                    <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">${escapeHtml(prompt.description)}</p>
+                </div>
+                
+                ${promptContent}
+            `;
+            
+            navigateTo('detail');
+        }
+
+        // ===== UPLOAD FORM HANDLING =====
+        function togglePriceInput() {
+            const priceType = document.getElementById('priceType').value;
+            const priceInputGroup = document.getElementById('priceInputGroup');
+            const sellerContactGroup = document.getElementById('sellerContactGroup');
+            
+            if (priceType === 'paid') {
+                priceInputGroup.style.display = 'flex';
+                sellerContactGroup.style.display = 'flex';
+            } else {
+                priceInputGroup.style.display = 'none';
+                sellerContactGroup.style.display = 'none';
+                
+                document.getElementById('price').value = '';
+                document.getElementById('sellerContact').value = '';
+            }
+        }
+
+        // ===== FORM SUBMISSION =====
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload...';
+            
+            const priceType = document.getElementById('priceType').value;
+            const price = priceType === 'paid' ? parseInt(document.getElementById('price').value) || 0 : 0;
+            const sellerContact = priceType === 'paid' ? document.getElementById('sellerContact').value.trim() : '';
+            
+            // Validasi dasar
+            if (priceType === 'paid') {
+                if (price < 1000 || price > 1000000) {
+                    showAlert('Error', 'Harga harus antara Rp 1.000 - Rp 1.000.000', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    return;
+                }
+                
+                if (!sellerContact) {
+                    showAlert('Error', 'Masukkan kontak penjual (WhatsApp/Telegram)', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    return;
+                }
+            }
+            
+            const formData = {
+                nama: document.getElementById('promptName').value.trim(),
+                ai: getSelectedAI(),
+                description: document.getElementById('description').value.trim(),
+                prompt: document.getElementById('promptContent').value.trim(),
+                creator: document.getElementById('isAnonymous').checked ? 'Anonymous' : (document.getElementById('creator').value.trim() || 'Anonymous'),
+                isAnonymous: document.getElementById('isAnonymous').checked || !document.getElementById('creator').value.trim(),
+                priceType: priceType,
+                price: price,
+                rating: 0,
+                ratingCount: 0,
+                comments: []
+            };
+            
+            if (!formData.ai || formData.ai.length === 0) {
+                showAlert('Error', 'Pilih minimal 1 AI yang didukung', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                return;
+            }
+            
+            if (formData.prompt.length < 10) {
+                showAlert('Error', 'Isi prompt terlalu pendek (minimal 10 karakter)', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                return;
+            }
+            
+            try {
+                // ENKRIPSI OTOMATIS OLEH SISTEM
+                let uploadData = { ...formData };
+                
+                if (priceType === 'paid') {
+                    // Sistem otomatis mengenkripsi prompt
+                    const encryptionResult = encryptPrompt(formData.prompt);
+                    if (!encryptionResult) {
+                        throw new Error('Gagal mengenkripsi prompt');
+                    }
+                    
+                    uploadData.encryptedPrompt = encryptionResult.encryptedText;
+                    uploadData.sellerContact = sellerContact;
+                    uploadData.prompt = '[ENCRYPTED]'; // Hanya placeholder
+                    
+                    // Password akan ditampilkan ke user setelah sukses
+                    generatedPassword = encryptionResult.password;
+                }
+                
+                const response = await fetch('/api/prompts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(uploadData)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    const errorMsg = result.errors ? result.errors.join(', ') : 'Gagal upload. Coba lagi.';
+                    showAlert('Error', errorMsg, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    return;
+                }
+                
+                // TAMPILKAN PASSWORD HANYA 1x (UNTUK PROMPT BERBAYAR)
+                if (priceType === 'paid') {
+                    showAlert(
+                        'BERHASIL! Password HANYA 1x Muncul', 
+                        `✅ Prompt berhasil diupload untuk dijual seharga Rp ${price.toLocaleString()}!\n\n` +
+                        `🔐 PASSWORD PROMPT ANDA:\n` +
+                        `📋 ${generatedPassword}\n\n` +
+                        `⚠️ PENTING:\n` +
+                        `1. SCREENSHOT atau COPY password ini sekarang!\n` +
+                        `2. Password HANYA muncul 1x - tidak bisa dilihat lagi\n` +
+                        `3. Berikan password ini ke pembeli setelah pembayaran\n` +
+                        `4. Jangan bagikan password ke sembarang orang\n\n` +
+                        `Kontak Anda: ${sellerContact}`,
+                        'info',
+                        '<i class="fas fa-key"></i>'
+                    );
+                } else {
+                    showAlert('Berhasil!', 'Prompt berhasil diupload dan dibagikan gratis ke komunitas!', 'success');
+                }
+                
+                // Reset form
+                document.getElementById('uploadForm').reset();
+                togglePriceInput();
+                
+                // Reset character counters
+                document.querySelectorAll('.char-count').forEach(counter => {
+                    counter.textContent = '0/' + counter.parentElement.querySelector('input, textarea').maxLength;
+                    counter.style.color = 'var(--text-secondary)';
+                });
+                
+                // Reset helper button
+                const helperBtn = document.getElementById('helperBtn');
+                const tutorial = document.getElementById('uploadTutorial');
+                if (helperBtn) {
+                    helperBtn.innerHTML = '<i class="fas fa-question-circle"></i> Lihat Tutorial Upload (Step-by-Step)';
+                    helperBtn.style.background = 'var(--warning-color)';
+                }
+                if (tutorial) {
+                    tutorial.style.display = 'none';
+                }
+                
+                setTimeout(() => {
+                    loadPrompts();
+                    navigateTo('home');
+                }, priceType === 'paid' ? 5000 : 2000);
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showAlert('Error', 'Koneksi gagal. Pastikan Anda terhubung ke internet.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+
+        function getSelectedAI() {
+            const checkboxes = document.querySelectorAll('.ai-checkboxes input[type="checkbox"]:checked');
+            const selected = Array.from(checkboxes).map(cb => cb.value);
+            
+            const customAI = document.getElementById('customAI').value.trim();
+            if (customAI) {
+                selected.push(customAI);
+            }
+            
+            return selected.filter(ai => ai.length > 0);
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function copyPromptById(promptId) {
+            const prompt = allPrompts.find(p => p.id === promptId);
+            if (prompt) {
+                copyToClipboard(prompt.prompt);
+                showAlert('Berhasil!', 'Prompt berhasil disalin ke clipboard!', 'success');
+            }
+        }
+
+        function copyCurrentPrompt() {
+            const prompt = allPrompts.find(p => p.id === currentPromptId);
+            if (prompt) {
+                copyToClipboard(prompt.prompt);
+                showAlert('Berhasil!', 'Prompt berhasil disalin ke clipboard!', 'success');
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Copied to clipboard');
+            }).catch(err => {
+                // Fallback untuk browser lama
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+        }
+
+        function buyPremium() {
+            showAlert(
+                'SouGPT Prompt Pack', 
+                'Harga: Rp 25.000\n\n' +
+                'Fitur Premium:\n' +
+                '• 50+ Prompt premium\n' +
+                '• Template lengkap berbagai kategori\n' +
+                '• Dokumentasi detail\n' +
+                '• Update gratis 3 bulan\n' +
+                '• Support langsung developer\n' +
+                '• Akses channel premium\n\n' +
+                'Untuk pembelian, hubungi admin SouGPT via WhatsApp atau Telegram.',
+                'info',
+                '<i class="fas fa-crown"></i>'
+            );
+        }
+
+        // ===== SEARCH FUNCTIONALITY =====
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (!allPrompts.length) return;
+            
+            if (query === '') {
+                displayPrompts(allPrompts);
+                return;
+            }
+            
+            const filtered = allPrompts.filter(prompt => 
+                prompt.nama.toLowerCase().includes(query) ||
+                prompt.ai.some(ai => ai.toLowerCase().includes(query)) ||
+                prompt.description.toLowerCase().includes(query) ||
+                (prompt.creator && prompt.creator.toLowerCase().includes(query))
+            );
+            
+            const grid = document.getElementById('promptsGrid');
+            const noPromptsEl = document.getElementById('noPrompts');
+            
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                noPromptsEl.classList.remove('hidden');
+                noPromptsEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-search" style="font-size: 3rem;"></i>
+                        </div>
+                        <h3>Tidak ditemukan</h3>
+                        <p>Tidak ada prompt yang cocok dengan pencarian "${escapeHtml(query)}"</p>
+                    </div>
+                `;
+            } else {
+                noPromptsEl.classList.add('hidden');
+                displayPrompts(filtered);
+            }
+        });
+
+        // ===== CHARACTER COUNTERS =====
+        document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(element => {
+            const counter = element.parentElement.querySelector('.char-count');
+            if (counter) {
+                element.addEventListener('input', () => {
+                    const current = element.value.length;
+                    const max = element.getAttribute('maxlength');
+                    counter.textContent = `${current}/${max}`;
+                    
+                    // Change color if near limit
+                    if (current > max * 0.9) {
+                        counter.style.color = 'var(--error-color)';
+                    } else if (current > max * 0.75) {
+                        counter.style.color = 'var(--warning-color)';
+                    } else {
+                        counter.style.color = 'var(--text-secondary)';
+                    }
+                });
+            }
+        });
+
+        // ===== INITIALIZATION =====
+        window.addEventListener('DOMContentLoaded', () => {
+            initCarousel();
+            loadPrompts();
+            togglePriceInput();
+            checkMobile();
+            
+            // Initialize touch events for mobile
+            if ('ontouchstart' in window) {
+                // Add touch feedback for buttons
+                document.querySelectorAll('.helper-btn, .btn, nav a').forEach(btn => {
+                    btn.addEventListener('touchstart', () => {
+                        btn.style.transform = 'scale(0.97)';
+                        btn.style.opacity = '0.9';
+                    }, { passive: true });
+                    
+                    btn.addEventListener('touchend', () => {
+                        btn.style.transform = '';
+                        btn.style.opacity = '';
+                    }, { passive: true });
+                });
+            }
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (isMobile) {
+                    const nav = document.getElementById('mainNav');
+                    const menuBtn = document.getElementById('mobileMenuBtn');
+                    
+                    if (!nav.contains(e.target) && !menuBtn.contains(e.target) && nav.classList.contains('show')) {
+                        nav.classList.remove('show');
+                        menuBtn.classList.remove('active');
+                    }
+                }
+            });
+            
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, { passive: false });
+            
+            // Add haptic feedback on mobile if supported
+            if (navigator.vibrate) {
+                document.querySelectorAll('.helper-btn, .btn[onclick], .btn-join').forEach(el => {
+                    el.addEventListener('touchstart', () => {
+                        navigator.vibrate(10);
+                    }, { passive: true });
+                });
+            }
+            
+            // Fix untuk iOS input zoom
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                document.addEventListener('focus', (e) => {
+                    if (e.target.matches('input, textarea, select')) {
+                        document.body.style.fontSize = '16px';
+                    }
+                }, true);
+                
+                document.addEventListener('blur', (e) => {
+                    if (e.target.matches('input, textarea, select')) {
+                        document.body.style.fontSize = '';
+                    }
+                }, true);
+            }
+        });
+
+        // Close mobile menu on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (isMobile) {
+                    const nav = document.getElementById('mainNav');
+                    const menuBtn = document.getElementById('mobileMenuBtn');
+                    if (nav.classList.contains('show')) {
+                        nav.classList.remove('show');
+                        menuBtn.classList.remove('active');
+                    }
+                }
+                hideAlert();
+                hidePaymentModal();
+            }
+        });
+    </script>
+</body>
+</html>

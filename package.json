@@ -1,0 +1,19 @@
+{
+  "name": "perpustakaan-prompt-ai",
+  "version": "2.0.0",
+  "description": "Platform berbagi prompt AI dengan sistem enkripsi otomatis",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.22.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["ai", "prompt", "community", "encryption", "souGPT"],
+  "author": "Komunitas SouGPT",
+  "license": "MIT"
+}
