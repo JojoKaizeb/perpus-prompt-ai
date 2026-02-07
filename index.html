@@ -3144,7 +3144,7 @@
             noPromptsEl.classList.add('hidden');
             
             try {
-                const response = await fetch('./netlify/functions/prompts');
+                const response = await fetch('/.netlify/functions/prompts');
                 if (!response.ok) throw new Error('API error');
                 
                 allPrompts = await response.json();
@@ -3434,7 +3434,7 @@
                     generatedPassword = encryptionResult.password;
                 }
                 
-                const response = await fetch('./netlify/functions/prompts', {
+                const response = await fetch('/.netlify/functions/prompts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(uploadData)
