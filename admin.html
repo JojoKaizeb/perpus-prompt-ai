@@ -208,6 +208,81 @@ header {
 
 .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0.9rem;
+}
+
+.dropdown-trigger {
+  width: 100%;
+  padding: 0.72rem 0.9rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.18s;
+}
+
+.dropdown-trigger:hover {
+  border-color: var(--border2);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  z-index: 100;
+  display: none;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-option {
+  padding: 0.6rem 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.dropdown-option:hover {
+  background: var(--bg2);
+}
+
+.dropdown-option.selected {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dropdown-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
 .btn-submit {
   padding: 0.72rem 1rem; background: var(--accent); border: none;
   border-radius: var(--radius-sm); color: #fff;
@@ -353,6 +428,23 @@ header {
 .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.55s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.cat-badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.cat-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  padding: 0.15rem 0.4rem;
+  background: var(--accent-soft);
+  border: 1px solid rgba(108,99,255,0.2);
+  color: var(--accent);
+  border-radius: 4px;
+}
+
 @media (max-width: 720px) {
   .grid2 { grid-template-columns: 1fr; }
   .span2 { grid-column: 1; }
@@ -380,11 +472,11 @@ header {
     </div>
     <div class="field">
       <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="admin@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="email" id="loginEmail" placeholder="admin@email.com">
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="loginPass" placeholder="••••••••">
     </div>
     <button class="btn-primary" id="loginBtn" onclick="doLogin()">
       <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
@@ -440,7 +532,7 @@ header {
           <div class="form-col">
             <div class="row2">
               <div class="field"><label>Emoji</label><input type="text" id="catEmoji" placeholder="🤖" maxlength="4"></div>
-              <div class="field"><label>Nama Kategori</label><input type="text" id="catName" placeholder="Claude, GPT..." onkeydown="if(event.key==='Enter')addCat()"></div>
+              <div class="field"><label>Nama Kategori</label><input type="text" id="catName" placeholder="Claude, GPT..."></div>
             </div>
             <button class="btn-submit" id="btnCat" onclick="addCat()">
               <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -479,7 +571,20 @@ header {
           <input type="hidden" id="editId">
           <div class="fg">
             <div class="field"><label>Judul Prompt</label><input type="text" id="pTitle" placeholder="Nama prompt..."></div>
-            <div class="field"><label>Kategori</label><select id="pCat"><option value="">— Pilih Kategori —</option></select></div>
+            <div class="field"><label>Deskripsi Singkat</label><input type="text" id="pDescription" placeholder="Penjelasan singkat tentang prompt ini..."></div>
+          </div>
+          <div class="field">
+            <label>Kategori (bisa pilih banyak)</label>
+            <div class="custom-dropdown" id="pCatDropdown">
+              <div class="dropdown-trigger" onclick="toggleCategoryDropdown()">
+                <span id="selectedCatsDisplay">— Pilih Kategori —</span>
+                <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div class="dropdown-menu" id="catDropdownMenu"></div>
+            </div>
+            <div id="selectedCatsList" class="cat-badge-list"></div>
           </div>
           <div class="field" style="margin-top:0.85rem">
             <label>Isi Prompt</label>
@@ -503,8 +608,8 @@ header {
         </div>
         <div class="panel-body">
           <div class="search-row">
-            <input type="text" id="pSearch" placeholder="Cari prompt..." oninput="renderPromptList()">
-            <select id="pFilterCat" onchange="renderPromptList()"><option value="">Semua Kategori</option></select>
+            <input type="text" id="pSearch" placeholder="Cari prompt...">
+            <select id="pFilterCat"><option value="">Semua Kategori</option></select>
           </div>
           <div class="list" id="promptList" style="max-height:440px"><div class="empty-list">Loading...</div></div>
         </div>
@@ -545,7 +650,7 @@ const SUPA_KEY = 'sb_publishable_W7N9zRqZlirQdLQvURiexA_Mj8Nvx5C';
 const { createClient } = supabase;
 const db = createClient(SUPA_URL, SUPA_KEY);
 
-let cats = [], prompts = [], delTarget = null;
+let cats = [], prompts = [], delTarget = null, selectedCats = [];
 
 function getTheme() { return document.documentElement.getAttribute('data-theme') || 'dark'; }
 
@@ -620,15 +725,73 @@ async function doLogout() {
 }
 
 async function loadAll() {
-  const [{ data: c }, { data: p }] = await Promise.all([
+  const [{ data: c }, { data: p }, { data: pc }] = await Promise.all([
     db.from('categories').select('*').order('name'),
-    db.from('prompts').select('*, categories(name)').order('created_at', { ascending: false })
+    db.from('prompts').select('*, categories:prompt_categories(category_id)').order('created_at', { ascending: false }),
+    db.from('prompt_categories').select('*')
   ]);
   cats = c || [];
-  prompts = p || [];
+  prompts = (p || []).map(prompt => {
+    prompt.category_ids = (pc || [])
+      .filter(x => x.prompt_id === prompt.id)
+      .map(x => x.category_id);
+    prompt.categories = cats.filter(c => prompt.category_ids.includes(c.id));
+    return prompt;
+  });
   renderCatList();
   renderPromptList();
   updateSelects();
+  renderCategoryDropdown();
+}
+
+function renderCategoryDropdown() {
+  const menu = document.getElementById('catDropdownMenu');
+  if (!cats.length) {
+    menu.innerHTML = '<div class="dropdown-option">Belum ada kategori</div>';
+    return;
+  }
+  menu.innerHTML = cats.map(c => {
+    const isSelected = selectedCats.includes(c.id);
+    return `
+      <div class="dropdown-option ${isSelected ? 'selected' : ''}" onclick="toggleCatSelection('${c.id}')">
+        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleCatSelection('${c.id}')">
+        <span>${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}</span>
+      </div>
+    `;
+  }).join('');
+  updateSelectedCatsDisplay();
+}
+
+function toggleCategoryDropdown() {
+  document.getElementById('catDropdownMenu').classList.toggle('show');
+}
+
+function toggleCatSelection(catId) {
+  const index = selectedCats.indexOf(catId);
+  if (index === -1) {
+    selectedCats.push(catId);
+  } else {
+    selectedCats.splice(index, 1);
+  }
+  renderCategoryDropdown();
+}
+
+function updateSelectedCatsDisplay() {
+  const display = document.getElementById('selectedCatsDisplay');
+  const listEl = document.getElementById('selectedCatsList');
+  if (selectedCats.length === 0) {
+    display.textContent = '— Pilih Kategori —';
+    listEl.innerHTML = '';
+    return;
+  }
+  const selected = cats.filter(c => selectedCats.includes(c.id));
+  display.textContent = selected.map(c => c.name).join(', ');
+  listEl.innerHTML = selected.map(c => `
+    <span class="cat-badge">
+      ${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}
+      <span style="cursor:pointer;margin-left:4px;" onclick="toggleCatSelection('${c.id}')">✕</span>
+    </span>
+  `).join('');
 }
 
 function renderCatList() {
@@ -636,7 +799,7 @@ function renderCatList() {
   document.getElementById('catMeta').textContent = cats.length + ' kategori';
   if (!cats.length) { el.innerHTML = '<div class="empty-list">Belum ada kategori.</div>'; return; }
   el.innerHTML = cats.map(c => {
-    const n = prompts.filter(p => p.category_id === c.id).length;
+    const n = prompts.filter(p => p.category_ids.includes(c.id)).length;
     return `<div class="list-item">
       <div class="list-info">
         <div class="list-name">${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}</div>
@@ -657,18 +820,20 @@ function renderPromptList() {
   const sq = document.getElementById('pSearch').value.toLowerCase();
   const sf = document.getElementById('pFilterCat').value;
   let data = [...prompts];
-  if (sq) data = data.filter(p => p.title.toLowerCase().includes(sq) || p.content.toLowerCase().includes(sq));
-  if (sf) data = data.filter(p => p.category_id === sf);
+  if (sq) data = data.filter(p => p.title.toLowerCase().includes(sq) || p.content.toLowerCase().includes(sq) || (p.description || '').toLowerCase().includes(sq));
+  if (sf) data = data.filter(p => p.category_ids.includes(sf));
   document.getElementById('promptMeta').textContent = data.length + '/' + prompts.length + ' prompt';
   if (!data.length) { el.innerHTML = '<div class="empty-list">Belum ada prompt.</div>'; return; }
   el.innerHTML = data.map(p => {
-    const cat = cats.find(c => c.id === p.category_id);
-    const catLbl = cat ? (cat.emoji ? cat.emoji + ' ' : '') + cat.name : 'Uncategorized';
+    const catLabels = (p.categories || []).map(c => (c.emoji ? c.emoji + ' ' : '') + c.name).join(', ');
     const prev = p.content.length > 90 ? p.content.slice(0,90)+'...' : p.content;
+    const desc = p.description ? `<div class="list-sub" style="color:var(--accent)">📝 ${esc(p.description)}</div>` : '';
     return `<div class="list-item">
       <div class="list-info">
         <div class="list-name">${esc(p.title)}</div>
-        <div class="list-sub">${esc(catLbl)} &middot; ${esc(prev.replace(/\n/g,' '))}</div>
+        ${desc}
+        <div class="list-sub">📁 ${esc(catLabels)}</div>
+        <div class="list-sub">${esc(prev.replace(/\n/g,' '))}</div>
       </div>
       <div class="list-actions">
         <button class="btn-edt" onclick="editPrompt('${p.id}')">
@@ -686,9 +851,16 @@ function renderPromptList() {
 
 function updateSelects() {
   const opts = cats.map(c => `<option value="${c.id}">${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}</option>`).join('');
-  document.getElementById('pCat').innerHTML = '<option value="">— Pilih Kategori —</option>' + opts;
   document.getElementById('pFilterCat').innerHTML = '<option value="">Semua Kategori</option>' + opts;
 }
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('catDropdownMenu');
+  const trigger = document.querySelector('.dropdown-trigger');
+  if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
 
 async function addCat() {
   const name = document.getElementById('catName').value.trim();
@@ -713,24 +885,35 @@ async function addCat() {
 
 async function savePrompt() {
   const title = document.getElementById('pTitle').value.trim();
+  const description = document.getElementById('pDescription').value.trim() || null;
   const content = document.getElementById('pContent').value.trim();
-  const category_id = document.getElementById('pCat').value;
   const editId = document.getElementById('editId').value;
   const btn = document.getElementById('btnPrompt');
   const st = document.getElementById('promptStatus');
   if (!title) { setStatus(st, 'Judul prompt wajib diisi!', 'err'); return; }
   if (!content) { setStatus(st, 'Isi prompt wajib diisi!', 'err'); return; }
-  if (!category_id) { setStatus(st, 'Pilih kategori terlebih dahulu!', 'err'); return; }
+  if (selectedCats.length === 0) { setStatus(st, 'Pilih minimal satu kategori!', 'err'); return; }
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span>';
+  let promptId = editId;
   let error;
   if (editId) {
-    ({ error } = await db.from('prompts').update({ title, content, category_id }).eq('id', editId));
+    ({ error } = await db.from('prompts').update({ title, description, content }).eq('id', editId));
   } else {
-    ({ error } = await db.from('prompts').insert({ title, content, category_id }));
+    const { data, error: insertError } = await db.from('prompts').insert({ title, description, content }).select();
+    error = insertError;
+    if (data && data[0]) promptId = data[0].id;
   }
-  if (error) { setStatus(st, error.message, 'err'); }
-  else {
+  if (error) {
+    setStatus(st, error.message, 'err');
+  } else {
+    if (editId) {
+      await db.from('prompt_categories').delete().eq('prompt_id', editId);
+    }
+    if (promptId && selectedCats.length > 0) {
+      const inserts = selectedCats.map(catId => ({ prompt_id: promptId, category_id: catId }));
+      await db.from('prompt_categories').insert(inserts);
+    }
     cancelEdit();
     setStatus(st, '"' + title + '" berhasil ' + (editId ? 'diupdate' : 'ditambah') + '!', 'ok');
     showToast(editId ? 'Prompt diupdate!' : 'Prompt ditambah!');
@@ -746,21 +929,26 @@ function editPrompt(id) {
   if (!p) return;
   document.getElementById('editId').value = id;
   document.getElementById('pTitle').value = p.title;
+  document.getElementById('pDescription').value = p.description || '';
   document.getElementById('pContent').value = p.content;
-  document.getElementById('pCat').value = p.category_id || '';
+  selectedCats = [...(p.category_ids || [])];
+  renderCategoryDropdown();
+  updateSelectedCatsDisplay();
   document.getElementById('btnPrompt').className = 'btn-submit update';
   document.getElementById('btnPrompt').innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Prompt';
   document.getElementById('cancelBtn').style.display = 'inline-flex';
   document.getElementById('formTitle').innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edit Prompt';
-  document.getElementById('btnPrompt').scrollIntoView({ behavior: 'smooth', block: 'center' });
   setStatus(document.getElementById('promptStatus'), 'Mode edit aktif — jangan lupa simpan!', 'ok');
 }
 
 function cancelEdit() {
   document.getElementById('editId').value = '';
   document.getElementById('pTitle').value = '';
+  document.getElementById('pDescription').value = '';
   document.getElementById('pContent').value = '';
-  document.getElementById('pCat').value = '';
+  selectedCats = [];
+  renderCategoryDropdown();
+  updateSelectedCatsDisplay();
   document.getElementById('btnPrompt').className = 'btn-submit';
   document.getElementById('btnPrompt').innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Prompt';
   document.getElementById('cancelBtn').style.display = 'none';
@@ -772,7 +960,7 @@ function cancelEdit() {
 function askDel(type, id, name) {
   delTarget = { type, id };
   document.getElementById('confTitle').textContent = 'Hapus "' + name + '"?';
-  document.getElementById('confMsg').textContent = type === 'cat' ? 'Kategori ini akan dihapus permanen. Prompt di dalamnya bisa jadi orphan!' : 'Prompt ini akan dihapus permanen dan tidak bisa dikembalikan.';
+  document.getElementById('confMsg').textContent = type === 'cat' ? 'Kategori ini akan dihapus permanen.' : 'Prompt ini akan dihapus permanen dan tidak bisa dikembalikan.';
   document.getElementById('confOverlay').classList.add('open');
 }
 
@@ -804,6 +992,8 @@ function showToast(msg, isErr) {
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+document.getElementById('pSearch').addEventListener('input', renderPromptList);
+document.getElementById('pFilterCat').addEventListener('change', renderPromptList);
 document.getElementById('confOverlay').addEventListener('click', e => { if (e.target.id === 'confOverlay') closeConf(); });
 
 checkSession();

@@ -332,6 +332,14 @@ header {
   margin-bottom: 0.5rem; color: var(--text);
 }
 
+.card-description {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  color: var(--accent2);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
 .card-preview {
   font-family: 'DM Mono', monospace; font-size: 0.7rem;
   color: var(--text3); line-height: 1.65;
@@ -410,6 +418,16 @@ header {
 .modal-title {
   font-family: 'Instrument Serif', serif;
   font-size: 1.5rem; line-height: 1.25; letter-spacing: -0.01em;
+}
+
+.modal-description {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--accent2);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--border);
+  font-style: italic;
 }
 
 .close-btn {
@@ -566,6 +584,7 @@ header {
       <div>
         <div class="modal-badge" id="mBadge"></div>
         <div class="modal-title" id="mTitle"></div>
+        <div class="modal-description" id="mDescription"></div>
       </div>
       <button class="close-btn" onclick="closeModal()">
         <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -631,13 +650,20 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 updateThemeIcon(savedTheme);
 
 async function init() {
-  const [{ data: c, error: ce }, { data: p, error: pe }] = await Promise.all([
+  const [{ data: c, error: ce }, { data: p, error: pe }, { data: pc }] = await Promise.all([
     db.from('categories').select('*').order('name'),
-    db.from('prompts').select('*, categories(name)').order('created_at', { ascending: false })
+    db.from('prompts').select('*').order('created_at', { ascending: false }),
+    db.from('prompt_categories').select('*')
   ]);
   if (ce || pe) { showErr(); return; }
   cats = c || [];
-  prompts = p || [];
+  prompts = (p || []).map(prompt => {
+    prompt.category_ids = (pc || [])
+      .filter(x => x.prompt_id === prompt.id)
+      .map(x => x.category_id);
+    prompt.categories = cats.filter(c => prompt.category_ids.includes(c.id));
+    return prompt;
+  });
   document.getElementById('statP').textContent = prompts.length;
   document.getElementById('statC').textContent = cats.length;
   renderCats();
@@ -658,7 +684,7 @@ function renderCats() {
     <span class="cat-count">${prompts.length}</span>
   </button>`;
   cats.forEach(c => {
-    const n = prompts.filter(p => p.category_id === c.id).length;
+    const n = prompts.filter(p => p.category_ids.includes(c.id)).length;
     html += `<button class="cat-item ${activeCat===c.id?'active':''}" onclick="setCat('${c.id}')">
       <span class="cat-item-left">
         <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
@@ -672,8 +698,8 @@ function renderCats() {
 
 function renderGrid() {
   let data = [...prompts];
-  if (activeCat !== 'all') data = data.filter(p => p.category_id === activeCat);
-  if (query) { const q = query.toLowerCase(); data = data.filter(p => p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q)); }
+  if (activeCat !== 'all') data = data.filter(p => p.category_ids.includes(activeCat));
+  if (query) { const q = query.toLowerCase(); data = data.filter(p => p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q)); }
   if (sort === 'oldest') data.sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
   else if (sort === 'az') data.sort((a,b) => a.title.localeCompare(b.title));
   else data.sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
@@ -689,16 +715,18 @@ function renderGrid() {
   }
 
   grid.innerHTML = data.map((p, i) => {
-    const ci = cats.findIndex(c => c.id === p.category_id);
+    const catNames = p.categories.map(c => c.name).join(', ');
+    const catEmojis = p.categories.map(c => c.emoji).filter(Boolean).join(' ');
+    const ci = cats.findIndex(c => c.id === (p.categories[0]?.id || ''));
     const col = PALETTE[(ci >= 0 ? ci : i) % PALETTE.length];
-    const catName = p.categories?.name || 'Uncategorized';
     const date = new Date(p.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
-    return `<div class="card" onclick="openModal('${p.id}',${ci})">
+    return `<div class="card" onclick="openModal('${p.id}')">
       <div class="card-cat-badge" style="background:${col.bg};color:${col.color}">
         <svg class="icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-        ${esc(catName)}
+        ${catEmojis} ${esc(catNames)}
       </div>
       <div class="card-title">${esc(p.title)}</div>
+      ${p.description ? `<div class="card-description">📝 ${esc(p.description)}</div>` : ''}
       <div class="card-preview">${esc(p.content)}</div>
       <div class="card-footer">
         <button class="copy-btn" onclick="event.stopPropagation();quickCopy('${p.id}',this)">
@@ -713,15 +741,18 @@ function renderGrid() {
 
 function setCat(id) { activeCat = id; renderCats(); renderGrid(); }
 
-function openModal(id, ci) {
+function openModal(id) {
   const p = prompts.find(x => x.id === id);
   if (!p) return;
   curPrompt = p;
+  const catNames = p.categories.map(c => c.name).join(', ');
+  const catEmojis = p.categories.map(c => c.emoji).filter(Boolean).join(' ');
+  const ci = cats.findIndex(c => c.id === (p.categories[0]?.id || ''));
   const col = PALETTE[(ci >= 0 ? ci : 0) % PALETTE.length];
-  const catName = p.categories?.name || 'Uncategorized';
   document.getElementById('mBadge').style.cssText = `background:${col.bg};color:${col.color}`;
-  document.getElementById('mBadge').textContent = catName;
+  document.getElementById('mBadge').textContent = `${catEmojis} ${catNames}`;
   document.getElementById('mTitle').textContent = p.title;
+  document.getElementById('mDescription').textContent = p.description || '';
   document.getElementById('mBody').textContent = p.content;
   const btn = document.getElementById('mCopyBtn');
   btn.className = 'modal-copy';
