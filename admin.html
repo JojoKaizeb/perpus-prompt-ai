@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — PromptVault</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #0c0c0e;
+  --bg2: #131316;
+  --surface: #18181c;
+  --surface2: #1f1f25;
+  --border: #2a2a32;
+  --border2: #353540;
+  --accent: #6c63ff;
+  --accent-soft: rgba(108,99,255,0.12);
+  --accent2: #ff6584;
+  --accent3: #43e97b;
+  --danger: #ff5252;
+  --danger-soft: rgba(255,82,82,0.1);
+  --text: #f0f0f4;
+  --text2: #a0a0b0;
+  --text3: #606070;
+  --card: #111115;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --bg2: #ebebef;
+  --surface: #ffffff;
+  --surface2: #f0f0f4;
+  --border: #dddde8;
+  --border2: #c8c8d8;
+  --text: #111118;
+  --text2: #5a5a70;
+  --text3: #9090a8;
+  --card: #ffffff;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --danger-soft: rgba(255,82,82,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+svg.icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+
+#loginScreen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 60% 60% at 20% 30%, rgba(108,99,255,0.1) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 50% at 85% 75%, rgba(255,101,132,0.07) 0%, transparent 60%);
+}
+
+.login-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2.5rem;
+  width: 100%; max-width: 380px;
+}
+
+.login-logo {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-card h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.6rem; letter-spacing: -0.01em; margin-bottom: 0.4rem;
+}
+
+.login-card p { color: var(--text2); font-size: 0.85rem; line-height: 1.6; margin-bottom: 2rem; }
+
+.field { margin-bottom: 0.9rem; }
+
+.field label {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em;
+  display: block; margin-bottom: 0.4rem;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%; padding: 0.72rem 0.9rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s; resize: vertical;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field input::placeholder, .field textarea::placeholder { color: var(--text3); }
+
+.btn-primary {
+  width: 100%; padding: 0.82rem;
+  background: var(--accent); border: none; border-radius: var(--radius-sm);
+  color: #fff; font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+}
+
+.btn-primary:hover { background: #7d75ff; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.alert {
+  font-family: 'DM Mono', monospace; font-size: 0.72rem;
+  padding: 0.7rem 0.9rem; border-radius: var(--radius-sm);
+  margin-bottom: 0.9rem; display: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.alert { display: none; }
+.alert.show { display: flex; }
+.alert.err { background: var(--danger-soft); border: 1px solid rgba(255,82,82,0.2); color: var(--danger); }
+.alert.ok { background: rgba(67,233,123,0.1); border: 1px solid rgba(67,233,123,0.2); color: var(--accent3); }
+
+#adminApp { display: none; }
+
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(12,12,14,0.88);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+
+[data-theme="light"] header { background: rgba(245,245,247,0.9); }
+
+.hdr {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 62px; gap: 1rem;
+}
+
+.logo { display: flex; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--text); }
+.logo-mark { width: 30px; height: 30px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.logo-text { font-family: 'Instrument Serif', serif; font-size: 1.15rem; }
+.logo-text span { color: var(--accent); font-style: italic; }
+
+.badge {
+  font-family: 'DM Mono', monospace; font-size: 0.58rem;
+  background: var(--accent-soft); color: var(--accent);
+  padding: 0.18rem 0.5rem; border-radius: 5px;
+  border: 1px solid rgba(108,99,255,0.2);
+}
+
+.hdr-right { display: flex; align-items: center; gap: 0.5rem; }
+
+.user-chip {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem;
+  color: var(--text3); padding: 0.3rem 0.65rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; max-width: 160px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.icon-btn {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+}
+
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 0.38rem;
+  padding: 0.36rem 0.8rem;
+  font-family: 'DM Mono', monospace; font-size: 0.65rem;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text2);
+  cursor: pointer; text-decoration: none; transition: all 0.18s;
+}
+
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn-ghost.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+.span2 { grid-column: 1/-1; }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+.panel-head {
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.panel-title { font-size: 0.92rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+.panel-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--text3); }
+.panel-body { padding: 1.4rem; }
+
+.form-col { display: flex; flex-direction: column; gap: 0.85rem; }
+.row2 { display: grid; grid-template-columns: 72px 1fr; gap: 0.7rem; }
+
+.fg { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.btn-submit {
+  padding: 0.72rem 1rem; background: var(--accent); border: none;
+  border-radius: var(--radius-sm); color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+
+.btn-submit:hover { background: #7d75ff; }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-submit.update { background: #3b5bdb; }
+.btn-submit.update:hover { background: #4c6ef5; }
+
+.status {
+  font-family: 'DM Mono', monospace; font-size: 0.68rem;
+  padding: 0.55rem 0.75rem; border-radius: var(--radius-sm);
+  display: none; align-items: center; gap: 0.45rem; margin-top: 0.25rem;
+}
+
+.status.ok { background: rgba(67,233,123,0.1); border: 1px solid rgba(67,233,123,0.2); color: var(--accent3); display: flex; }
+.status.err { background: var(--danger-soft); border: 1px solid rgba(255,82,82,0.2); color: var(--danger); display: flex; }
+
+.list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 280px; overflow-y: auto; }
+
+.list-item {
+  display: flex; align-items: center;
+  padding: 0.65rem 0.9rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); gap: 0.65rem;
+  transition: border-color 0.15s;
+}
+
+.list-item:hover { border-color: var(--border2); }
+
+.list-info { flex: 1; min-width: 0; }
+.list-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-sub { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--text3); margin-top: 0.12rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+
+.btn-del {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  background: var(--danger-soft); border: 1px solid rgba(255,82,82,0.18);
+  color: var(--danger); border-radius: 6px; cursor: pointer;
+  font-size: 0.62rem; font-family: 'DM Mono', monospace; transition: all 0.15s;
+}
+
+.btn-del:hover { background: rgba(255,82,82,0.18); }
+
+.btn-edt {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  background: var(--accent-soft); border: 1px solid rgba(108,99,255,0.18);
+  color: var(--accent); border-radius: 6px; cursor: pointer;
+  font-size: 0.62rem; font-family: 'DM Mono', monospace; transition: all 0.15s;
+}
+
+.btn-edt:hover { background: rgba(108,99,255,0.2); }
+
+.empty-list { text-align: center; color: var(--text3); font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 2.5rem 1rem; }
+
+.search-row { display: flex; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+
+.search-row input, .search-row select {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-row input { flex: 1; min-width: 180px; }
+.search-row input:focus, .search-row select:focus { border-color: var(--accent); }
+
+.conf-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+
+.conf-overlay.open { opacity: 1; pointer-events: all; }
+
+.conf-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 2rem;
+  max-width: 340px; width: 90%; text-align: center;
+  transform: scale(0.96); transition: transform 0.2s;
+}
+
+.conf-overlay.open .conf-box { transform: scale(1); }
+
+.conf-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: var(--danger-soft); border: 1px solid rgba(255,82,82,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.25rem; color: var(--danger);
+}
+
+.conf-box h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.45rem; }
+.conf-box p { color: var(--text2); font-size: 0.82rem; margin-bottom: 1.5rem; line-height: 1.65; }
+
+.conf-btns { display: flex; gap: 0.65rem; }
+
+.btn-cancel {
+  flex: 1; padding: 0.7rem; background: transparent;
+  border: 1px solid var(--border); color: var(--text2);
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
+  transition: all 0.15s;
+}
+
+.btn-cancel:hover { border-color: var(--border2); color: var(--text); }
+
+.btn-confirm {
+  flex: 1; padding: 0.7rem;
+  background: var(--danger); border: none;
+  color: #fff; border-radius: var(--radius-sm); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+
+.btn-confirm:hover { background: #ff6b6b; }
+
+.toast {
+  position: fixed; bottom: 1.75rem; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); box-shadow: var(--shadow);
+  font-family: 'DM Mono', monospace; font-size: 0.72rem;
+  padding: 0.62rem 1.15rem; border-radius: 99px; z-index: 9000;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.err { border-color: rgba(255,82,82,0.3); }
+.toast .toast-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent3); }
+.toast.err .toast-dot { background: var(--danger); }
+
+.spin { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.55s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 720px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .span2 { grid-column: 1; }
+  .wrap { padding: 1rem; }
+  .fg { grid-template-columns: 1fr; }
+  .hdr { padding: 0 1rem; }
+  .user-chip { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    </div>
+    <h2>Admin Login</h2>
+    <p>Masuk dengan akun Supabase Auth. Password tidak tersimpan di kode.</p>
+    <div class="alert" id="loginAlert">
+      <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="loginAlertMsg"></span>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">
+      <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Masuk
+    </button>
+  </div>
+</div>
+
+<div id="adminApp">
+  <header>
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:0.65rem">
+        <a href="index.html" class="logo">
+          <div class="logo-mark">
+            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          <span class="logo-text">Prompt<span>Vault</span></span>
+        </a>
+        <span class="badge">ADMIN</span>
+      </div>
+      <div class="hdr-right">
+        <span class="user-chip" id="userEmail">—</span>
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme">
+          <svg class="icon" id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <a href="index.html" class="btn-ghost">
+          <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Lihat Web
+        </a>
+        <button class="btn-ghost danger" onclick="doLogout()">
+          <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="grid2">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            Tambah Kategori
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="form-col">
+            <div class="row2">
+              <div class="field"><label>Emoji</label><input type="text" id="catEmoji" placeholder="🤖" maxlength="4"></div>
+              <div class="field"><label>Nama Kategori</label><input type="text" id="catName" placeholder="Claude, GPT..." onkeydown="if(event.key==='Enter')addCat()"></div>
+            </div>
+            <button class="btn-submit" id="btnCat" onclick="addCat()">
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Kategori
+            </button>
+            <div class="status" id="catStatus"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Daftar Kategori
+          </div>
+          <span class="panel-meta" id="catMeta">0 kategori</span>
+        </div>
+        <div class="panel-body">
+          <div class="list" id="catList"><div class="empty-list">Loading...</div></div>
+        </div>
+      </div>
+
+      <div class="panel span2">
+        <div class="panel-head">
+          <div class="panel-title" id="formTitle">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Tambah Prompt
+          </div>
+          <button class="btn-ghost" id="cancelBtn" onclick="cancelEdit()" style="display:none">
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Cancel
+          </button>
+        </div>
+        <div class="panel-body">
+          <input type="hidden" id="editId">
+          <div class="fg">
+            <div class="field"><label>Judul Prompt</label><input type="text" id="pTitle" placeholder="Nama prompt..."></div>
+            <div class="field"><label>Kategori</label><select id="pCat"><option value="">— Pilih Kategori —</option></select></div>
+          </div>
+          <div class="field" style="margin-top:0.85rem">
+            <label>Isi Prompt</label>
+            <textarea id="pContent" rows="8" placeholder="Tulis prompt lo di sini..."></textarea>
+          </div>
+          <button class="btn-submit" id="btnPrompt" onclick="savePrompt()" style="margin-top:0.85rem">
+            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Prompt
+          </button>
+          <div class="status" id="promptStatus"></div>
+        </div>
+      </div>
+
+      <div class="panel span2">
+        <div class="panel-head">
+          <div class="panel-title">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Semua Prompt
+          </div>
+          <span class="panel-meta" id="promptMeta">0 prompt</span>
+        </div>
+        <div class="panel-body">
+          <div class="search-row">
+            <input type="text" id="pSearch" placeholder="Cari prompt..." oninput="renderPromptList()">
+            <select id="pFilterCat" onchange="renderPromptList()"><option value="">Semua Kategori</option></select>
+          </div>
+          <div class="list" id="promptList" style="max-height:440px"><div class="empty-list">Loading...</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="conf-overlay" id="confOverlay">
+  <div class="conf-box">
+    <div class="conf-icon">
+      <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+      </svg>
+    </div>
+    <h3 id="confTitle">Hapus ini?</h3>
+    <p id="confMsg">Data yang dihapus tidak bisa dikembalikan.</p>
+    <div class="conf-btns">
+      <button class="btn-cancel" onclick="closeConf()">Batal</button>
+      <button class="btn-confirm" onclick="doDelete()">
+        <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+        Hapus
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Berhasil!</span>
+</div>
+
+<script>
+const SUPA_URL = 'https://ihykejeacueeitthgkze.supabase.co';
+const SUPA_KEY = 'sb_publishable_W7N9zRqZlirQdLQvURiexA_Mj8Nvx5C';
+
+const { createClient } = supabase;
+const db = createClient(SUPA_URL, SUPA_KEY);
+
+let cats = [], prompts = [], delTarget = null;
+
+function getTheme() { return document.documentElement.getAttribute('data-theme') || 'dark'; }
+
+function toggleTheme() {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('pv-theme', next);
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const icon = document.getElementById('themeIcon');
+  if (theme === 'light') {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+}
+
+const savedTheme = localStorage.getItem('pv-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+async function checkSession() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) showAdmin(session.user);
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  const alert = document.getElementById('loginAlert');
+  const alertMsg = document.getElementById('loginAlertMsg');
+  alert.className = 'alert';
+
+  if (!email || !pass) {
+    alertMsg.textContent = 'Email dan password wajib diisi!';
+    alert.className = 'alert err show';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Masuk...';
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+
+  if (error) {
+    alertMsg.textContent = error.message === 'Invalid login credentials' ? 'Email atau password salah!' : error.message;
+    alert.className = 'alert err show';
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Masuk';
+    return;
+  }
+
+  showAdmin(data.user);
+}
+
+function showAdmin(user) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  document.getElementById('userEmail').textContent = user.email;
+  loadAll();
+}
+
+async function doLogout() {
+  await db.auth.signOut();
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+async function loadAll() {
+  const [{ data: c }, { data: p }] = await Promise.all([
+    db.from('categories').select('*').order('name'),
+    db.from('prompts').select('*, categories(name)').order('created_at', { ascending: false })
+  ]);
+  cats = c || [];
+  prompts = p || [];
+  renderCatList();
+  renderPromptList();
+  updateSelects();
+}
+
+function renderCatList() {
+  const el = document.getElementById('catList');
+  document.getElementById('catMeta').textContent = cats.length + ' kategori';
+  if (!cats.length) { el.innerHTML = '<div class="empty-list">Belum ada kategori.</div>'; return; }
+  el.innerHTML = cats.map(c => {
+    const n = prompts.filter(p => p.category_id === c.id).length;
+    return `<div class="list-item">
+      <div class="list-info">
+        <div class="list-name">${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}</div>
+        <div class="list-sub">${n} prompt</div>
+      </div>
+      <div class="list-actions">
+        <button class="btn-del" onclick="askDel('cat','${c.id}','${esc(c.name)}')">
+          <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          Hapus
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPromptList() {
+  const el = document.getElementById('promptList');
+  const sq = document.getElementById('pSearch').value.toLowerCase();
+  const sf = document.getElementById('pFilterCat').value;
+  let data = [...prompts];
+  if (sq) data = data.filter(p => p.title.toLowerCase().includes(sq) || p.content.toLowerCase().includes(sq));
+  if (sf) data = data.filter(p => p.category_id === sf);
+  document.getElementById('promptMeta').textContent = data.length + '/' + prompts.length + ' prompt';
+  if (!data.length) { el.innerHTML = '<div class="empty-list">Belum ada prompt.</div>'; return; }
+  el.innerHTML = data.map(p => {
+    const cat = cats.find(c => c.id === p.category_id);
+    const catLbl = cat ? (cat.emoji ? cat.emoji + ' ' : '') + cat.name : 'Uncategorized';
+    const prev = p.content.length > 90 ? p.content.slice(0,90)+'...' : p.content;
+    return `<div class="list-item">
+      <div class="list-info">
+        <div class="list-name">${esc(p.title)}</div>
+        <div class="list-sub">${esc(catLbl)} &middot; ${esc(prev.replace(/\n/g,' '))}</div>
+      </div>
+      <div class="list-actions">
+        <button class="btn-edt" onclick="editPrompt('${p.id}')">
+          <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="btn-del" onclick="askDel('prompt','${p.id}','${esc(p.title)}')">
+          <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          Hapus
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateSelects() {
+  const opts = cats.map(c => `<option value="${c.id}">${c.emoji ? c.emoji + ' ' : ''}${esc(c.name)}</option>`).join('');
+  document.getElementById('pCat').innerHTML = '<option value="">— Pilih Kategori —</option>' + opts;
+  document.getElementById('pFilterCat').innerHTML = '<option value="">Semua Kategori</option>' + opts;
+}
+
+async function addCat() {
+  const name = document.getElementById('catName').value.trim();
+  const emoji = document.getElementById('catEmoji').value.trim();
+  const btn = document.getElementById('btnCat');
+  const st = document.getElementById('catStatus');
+  if (!name) { setStatus(st, 'Nama kategori wajib diisi!', 'err'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+  const { error } = await db.from('categories').insert({ name, emoji: emoji || null });
+  if (error) { setStatus(st, error.message, 'err'); }
+  else {
+    document.getElementById('catName').value = '';
+    document.getElementById('catEmoji').value = '';
+    setStatus(st, '"' + name + '" berhasil ditambah!', 'ok');
+    showToast('Kategori ditambah!');
+    await loadAll();
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Kategori';
+}
+
+async function savePrompt() {
+  const title = document.getElementById('pTitle').value.trim();
+  const content = document.getElementById('pContent').value.trim();
+  const category_id = document.getElementById('pCat').value;
+  const editId = document.getElementById('editId').value;
+  const btn = document.getElementById('btnPrompt');
+  const st = document.getElementById('promptStatus');
+  if (!title) { setStatus(st, 'Judul prompt wajib diisi!', 'err'); return; }
+  if (!content) { setStatus(st, 'Isi prompt wajib diisi!', 'err'); return; }
+  if (!category_id) { setStatus(st, 'Pilih kategori terlebih dahulu!', 'err'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+  let error;
+  if (editId) {
+    ({ error } = await db.from('prompts').update({ title, content, category_id }).eq('id', editId));
+  } else {
+    ({ error } = await db.from('prompts').insert({ title, content, category_id }));
+  }
+  if (error) { setStatus(st, error.message, 'err'); }
+  else {
+    cancelEdit();
+    setStatus(st, '"' + title + '" berhasil ' + (editId ? 'diupdate' : 'ditambah') + '!', 'ok');
+    showToast(editId ? 'Prompt diupdate!' : 'Prompt ditambah!');
+    await loadAll();
+  }
+  btn.disabled = false;
+  const isEdit = !!document.getElementById('editId').value;
+  btn.innerHTML = (isEdit ? '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Prompt' : '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Prompt');
+}
+
+function editPrompt(id) {
+  const p = prompts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('pTitle').value = p.title;
+  document.getElementById('pContent').value = p.content;
+  document.getElementById('pCat').value = p.category_id || '';
+  document.getElementById('btnPrompt').className = 'btn-submit update';
+  document.getElementById('btnPrompt').innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Prompt';
+  document.getElementById('cancelBtn').style.display = 'inline-flex';
+  document.getElementById('formTitle').innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edit Prompt';
+  document.getElementById('btnPrompt').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setStatus(document.getElementById('promptStatus'), 'Mode edit aktif — jangan lupa simpan!', 'ok');
+}
+
+function cancelEdit() {
+  document.getElementById('editId').value = '';
+  document.getElementById('pTitle').value = '';
+  document.getElementById('pContent').value = '';
+  document.getElementById('pCat').value = '';
+  document.getElementById('btnPrompt').className = 'btn-submit';
+  document.getElementById('btnPrompt').innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Prompt';
+  document.getElementById('cancelBtn').style.display = 'none';
+  document.getElementById('formTitle').innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Tambah Prompt';
+  const st = document.getElementById('promptStatus');
+  st.className = 'status';
+}
+
+function askDel(type, id, name) {
+  delTarget = { type, id };
+  document.getElementById('confTitle').textContent = 'Hapus "' + name + '"?';
+  document.getElementById('confMsg').textContent = type === 'cat' ? 'Kategori ini akan dihapus permanen. Prompt di dalamnya bisa jadi orphan!' : 'Prompt ini akan dihapus permanen dan tidak bisa dikembalikan.';
+  document.getElementById('confOverlay').classList.add('open');
+}
+
+function closeConf() { document.getElementById('confOverlay').classList.remove('open'); delTarget = null; }
+
+async function doDelete() {
+  if (!delTarget) return;
+  const { type, id } = delTarget;
+  closeConf();
+  const table = type === 'cat' ? 'categories' : 'prompts';
+  const { error } = await db.from(table).delete().eq('id', id);
+  if (error) showToast('Gagal hapus: ' + error.message, true);
+  else { showToast(type === 'cat' ? 'Kategori dihapus!' : 'Prompt dihapus!'); await loadAll(); }
+}
+
+function setStatus(el, msg, type) {
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  setTimeout(() => { el.className = 'status'; }, 4500);
+}
+
+function showToast(msg, isErr) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.className = 'toast' + (isErr ? ' err' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.getElementById('confOverlay').addEventListener('click', e => { if (e.target.id === 'confOverlay') closeConf(); });
+
+checkSession();
+</script>
+</body>
+</html>
