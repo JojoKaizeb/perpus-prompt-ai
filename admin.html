@@ -1,1373 +1,188 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — PromptVault</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --bg: #0a0a0f;
-  --bg-elevated: #12121a;
-  --bg-card: #16161f;
-  --bg-hover: #1e1e2a;
-  --border: #272736;
-  --border-hover: #3f3f55;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-glow: rgba(99,102,241,0.15);
-  --accent-secondary: #ec4899;
-  --accent-tertiary: #10b981;
-  --danger: #ef4444;
-  --danger-glow: rgba(239,68,68,0.15);
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
-  --length-short: #10b981;
-  --length-medium: #f59e0b;
-  --length-long: #ef4444;
-  --hot: #f97316;
-  --hot-glow: rgba(249,115,22,0.2);
-  --new: #6366f1;
-  --new-glow: rgba(99,102,241,0.2);
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-  --shadow: 0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -2px rgba(0,0,0,0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5),0 4px 6px -4px rgba(0,0,0,0.5);
-  --shadow-glow: 0 0 40px rgba(99,102,241,0.3);
-  --transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-}
-
-[data-theme="light"] {
-  --bg: #ffffff;
-  --bg-elevated: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-hover: #f1f5f9;
-  --border: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --accent: #4f46e5;
-  --accent-hover: #6366f1;
-  --accent-glow: rgba(79,70,229,0.1);
-  --text: #0f172a;
-  --text-muted: #475569;
-  --text-subtle: #94a3b8;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1);
-  --shadow-glow: 0 0 40px rgba(79,70,229,0.2);
-}
-
-* { margin:0; padding:0; box-sizing:border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.6;
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
-
-svg.icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
-
-#loginScreen {
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 60% 60% at 20% 30%, rgba(99,102,241,0.15) 0%, transparent 60%),
-              radial-gradient(ellipse 50% 50% at 85% 75%, rgba(236,72,153,0.1) 0%, transparent 60%);
-}
-
-.login-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-xl); padding: 2.5rem;
-  width: 100%; max-width: 380px;
-  box-shadow: var(--shadow-lg);
-}
-
-.login-logo {
-  width: 48px; height: 48px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-  border-radius: var(--radius);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.login-card h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.6rem; letter-spacing: -0.02em; margin-bottom: 0.4rem;
-}
-
-.login-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 2rem; }
-
-.field { margin-bottom: 0.9rem; }
-
-.field label {
-  font-family: 'Space Grotesk', sans-serif; font-size: 0.6rem;
-  color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.12em;
-  display: block; margin-bottom: 0.4rem;
-}
-
-.field input, .field select, .field textarea {
-  width: 100%; padding: 0.72rem 0.9rem;
-  background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--text);
-  font-family: 'Inter', sans-serif; font-size: 0.88rem; outline: none;
-  transition: var(--transition); resize: vertical;
-}
-
-.field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.field input::placeholder, .field textarea::placeholder { color: var(--text-subtle); }
-
-.btn-primary {
-  width: 100%; padding: 0.82rem;
-  background: var(--accent); border: none; border-radius: var(--radius-sm);
-  color: #fff; font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.9rem; font-weight: 600; cursor: pointer;
-  transition: var(--transition);
-  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
-}
-
-.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-.alert {
-  font-family: 'Space Grotesk', monospace; font-size: 0.72rem;
-  padding: 0.7rem 0.9rem; border-radius: var(--radius-sm);
-  margin-bottom: 0.9rem; display: none;
-  display: flex; align-items: center; gap: 0.5rem;
-}
-
-.alert { display: none; }
-.alert.show { display: flex; }
-.alert.err { background: var(--danger-glow); border: 1px solid rgba(239,68,68,0.2); color: var(--danger); }
-.alert.ok { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: var(--accent-tertiary); }
-
-#adminApp { display: none; }
-
-header {
-  position: sticky; top: 0; z-index: 200;
-  background: rgba(10,10,15,0.8);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
-  transition: var(--transition);
-}
-
-[data-theme="light"] header { background: rgba(255,255,255,0.8); }
-
-.hdr {
-  max-width: 1400px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 2rem; height: 70px;
-}
-
-.logo {
-  display: flex; align-items: center; gap: 0.75rem;
-  text-decoration: none; color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700; font-size: 1.5rem;
-  letter-spacing: -0.02em;
-}
-
-.logo-mark {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px var(--accent-glow);
-}
-
-.logo span { color: var(--accent); }
-
-.badge {
-  font-family: 'Space Grotesk', monospace; font-size: 0.58rem;
-  background: var(--accent-glow); color: var(--accent);
-  padding: 0.18rem 0.5rem; border-radius: 5px;
-  border: 1px solid rgba(99,102,241,0.2);
-}
-
-.hdr-right { display: flex; align-items: center; gap: 0.75rem; }
-
-.user-chip {
-  font-family: 'Space Grotesk', monospace; font-size: 0.6rem;
-  color: var(--text-muted); padding: 0.3rem 0.65rem;
-  background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); max-width: 160px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.icon-btn {
-  width: 40px; height: 40px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: var(--transition);
-}
-
-.icon-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-glow);
-  transform: translateY(-1px);
-}
-
-.btn-ghost {
-  display: inline-flex; align-items: center; gap: 0.38rem;
-  padding: 0.5rem 1rem;
-  font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem;
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--bg-elevated); color: var(--text-muted);
-  cursor: pointer; text-decoration: none; transition: var(--transition);
-}
-
-.btn-ghost:hover {
-  border-color: var(--accent); color: var(--accent); background: var(--accent-glow);
-  transform: translateY(-1px);
-}
-
-.btn-ghost.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-glow); }
-
-.wrap { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.span2 { grid-column: 1/-1; }
-
-.panel {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); overflow: hidden;
-  transition: var(--transition);
-}
-
-.panel:hover { border-color: var(--border-hover); }
-
-.panel-head {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--bg-elevated);
-}
-
-.panel-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.92rem; font-weight: 600;
-  display: flex; align-items: center; gap: 0.5rem;
-}
-
-.panel-meta {
-  font-family: 'Space Grotesk', monospace; font-size: 0.6rem;
-  color: var(--text-subtle); font-weight: 500;
-  background: var(--bg-hover);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-}
-
-.panel-body { padding: 1.5rem; }
-
-.form-col { display: flex; flex-direction: column; gap: 0.85rem; }
-.row2 { display: grid; grid-template-columns: 72px 1fr; gap: 0.7rem; }
-
-.fg { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-.custom-dropdown {
-  position: relative;
-  width: 100%;
-  margin-bottom: 0.9rem;
-}
-
-.dropdown-trigger {
-  width: 100%;
-  padding: 0.72rem 0.9rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: var(--transition);
-}
-
-.dropdown-trigger:hover {
-  border-color: var(--border-hover);
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  max-height: 240px;
-  overflow-y: auto;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  display: none;
-}
-
-.dropdown-menu.show {
-  display: block;
-}
-
-.dropdown-option {
-  padding: 0.6rem 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: var(--transition);
-  border-bottom: 1px solid var(--border);
-}
-
-.dropdown-option:last-child {
-  border-bottom: none;
-}
-
-.dropdown-option:hover {
-  background: var(--bg-hover);
-}
-
-.dropdown-option.selected {
-  background: var(--accent-glow);
-  color: var(--accent);
-}
-
-.dropdown-option input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--accent);
-}
-
-.btn-submit {
-  padding: 0.72rem 1rem;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius-sm);
-  color: #fff;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-}
-
-.btn-submit:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-.btn-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-submit.update {
-  background: #3b5bdb;
-}
-
-.btn-submit.update:hover {
-  background: #4c6ef5;
-}
-
-.status {
-  font-family: 'Space Grotesk', monospace;
-  font-size: 0.68rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: var(--radius-sm);
-  display: none;
-  align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.25rem;
-}
-
-.status.ok {
-  background: rgba(16,185,129,0.1);
-  border: 1px solid rgba(16,185,129,0.2);
-  color: var(--accent-tertiary);
-  display: flex;
-}
-
-.status.err {
-  background: var(--danger-glow);
-  border: 1px solid rgba(239,68,68,0.2);
-  color: var(--danger);
-  display: flex;
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  max-height: 280px;
-  overflow-y: auto;
-}
-
-.list-item {
-  display: flex;
-  align-items: center;
-  padding: 0.65rem 0.9rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  gap: 0.65rem;
-  transition: var(--transition);
-}
-
-.list-item:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-hover);
-}
-
-.list-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.list-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.list-sub {
-  font-family: 'Space Grotesk', monospace;
-  font-size: 0.58rem;
-  color: var(--text-muted);
-  margin-top: 0.12rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.list-actions {
-  display: flex;
-  gap: 0.35rem;
-  flex-shrink: 0;
-}
-
-.btn-del {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.55rem;
-  background: var(--danger-glow);
-  border: 1px solid rgba(239,68,68,0.18);
-  color: var(--danger);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-family: 'Space Grotesk', monospace;
-  transition: var(--transition);
-}
-
-.btn-del:hover {
-  background: rgba(239,68,68,0.18);
-  transform: translateY(-1px);
-}
-
-.btn-edt {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.55rem;
-  background: var(--accent-glow);
-  border: 1px solid rgba(99,102,241,0.18);
-  color: var(--accent);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.62rem;
-  font-family: 'Space Grotesk', monospace;
-  transition: var(--transition);
-}
-
-.btn-edt:hover {
-  background: rgba(99,102,241,0.2);
-  transform: translateY(-1px);
-}
-
-.empty-list {
-  text-align: center;
-  color: var(--text-subtle);
-  font-family: 'Space Grotesk', monospace;
-  font-size: 0.7rem;
-  padding: 2.5rem 1rem;
-}
-
-.search-row {
-  display: flex;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.9rem;
-}
-
-.search-row input, .search-row select {
-  padding: 0.5rem 0.75rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.82rem;
-  outline: none;
-  transition: var(--transition);
-}
-
-.search-row input {
-  flex: 1;
-  min-width: 180px;
-}
-
-.search-row input:focus, .search-row select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.conf-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  z-index: 500;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity 0.2s;
-}
-
-.conf-overlay.open { opacity: 1; pointer-events: all; }
-
-.conf-box {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 2rem;
-  max-width: 340px; width: 90%; text-align: center;
-  transform: scale(0.96); transition: transform 0.2s;
-}
-
-.conf-overlay.open .conf-box { transform: scale(1); }
-
-.conf-icon {
-  width: 52px; height: 52px; border-radius: var(--radius);
-  background: var(--danger-glow); border: 1px solid rgba(239,68,68,0.2);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 1.25rem; color: var(--danger);
-}
-
-.conf-box h3 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.05rem; font-weight: 600; margin-bottom: 0.45rem;
-}
-
-.conf-box p {
-  color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1.5rem; line-height: 1.65;
-}
-
-.conf-btns { display: flex; gap: 0.65rem; }
-
-.btn-cancel {
-  flex: 1; padding: 0.7rem; background: transparent;
-  border: 1px solid var(--border); color: var(--text-muted);
-  border-radius: var(--radius-sm); cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 500;
-  transition: var(--transition);
-}
-
-.btn-cancel:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
-  background: var(--bg-hover);
-}
-
-.btn-confirm {
-  flex: 1; padding: 0.7rem;
-  background: var(--danger); border: none;
-  color: #fff; border-radius: var(--radius-sm); cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 600;
-  transition: var(--transition);
-  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-}
-
-.btn-confirm:hover {
-  background: #ff6b6b;
-  transform: translateY(-1px);
-}
-
-.toast {
-  position: fixed; bottom: 1.75rem; left: 50%;
-  transform: translateX(-50%) translateY(60px);
-  display: flex; align-items: center; gap: 0.5rem;
-  background: var(--bg-card); border: 1px solid var(--border);
-  color: var(--text); box-shadow: var(--shadow-lg);
-  font-family: 'Space Grotesk', monospace; font-size: 0.72rem;
-  padding: 0.62rem 1.15rem; border-radius: 99px; z-index: 9000;
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-}
-
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.err { border-color: rgba(239,68,68,0.3); }
-.toast .toast-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent-tertiary);
-}
-.toast.err .toast-dot { background: var(--danger); }
-
-.spin {
-  display: inline-block; width: 13px; height: 13px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 50%; border-top-color: #fff;
-  animation: spin 0.55s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.cat-badge-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
-}
-
-.cat-badge {
-  font-family: 'Space Grotesk', monospace;
-  font-size: 0.55rem;
-  padding: 0.15rem 0.4rem;
-  background: var(--accent-glow);
-  border: 1px solid rgba(99,102,241,0.2);
-  color: var(--accent);
-  border-radius: 4px;
-}
-
-.new-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.4rem;
-  background: linear-gradient(135deg, var(--new), var(--accent-secondary));
-  color: white;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-radius: 4px;
-  margin-left: 0.25rem;
-}
-
-.hot-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.15rem 0.4rem;
-  background: linear-gradient(135deg, var(--hot), #fbbf24);
-  color: white;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-radius: 4px;
-  margin-left: 0.25rem;
-}
-
-.hot-badge::before {
-  content: '🔥';
-  font-size: 0.6rem;
-}
-
-.char-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.55rem;
-  font-weight: 600;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-}
-
-.char-badge.short {
-  color: var(--length-short);
-  background: rgba(16,185,129,0.1);
-}
-
-.char-badge.medium {
-  color: var(--length-medium);
-  background: rgba(245,158,11,0.1);
-}
-
-.char-badge.long {
-  color: var(--length-long);
-  background: rgba(239,68,68,0.1);
-}
-
-@media (max-width: 720px) {
-  .grid2 { grid-template-columns: 1fr; }
-  .span2 { grid-column: 1; }
-  .wrap { padding: 1rem; }
-  .fg { grid-template-columns: 1fr; }
-  .hdr { padding: 0 1rem; }
-  .user-chip { display: none; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Moved</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .turtle-wrapper {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 2rem;
+            position: relative;
+            filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.15));
+        }
+
+        .turtle-svg {
+            width: 100%;
+            height: 100%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        .led-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 20px rgba(255,255,255,0.1);
+        }
+
+        p {
+            color: #a0a0b0;
+            font-size: 1.125rem;
+            font-weight: 300;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: drift 20s linear infinite;
+        }
+
+        @keyframes drift {
+            from { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            to { transform: translateY(-10vh) translateX(100px); opacity: 0; }
+        }
+    </style>
 </head>
 <body>
-
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">
-      <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-      </svg>
-    </div>
-    <h2>Admin Login</h2>
-    <p>Masuk dengan akun Supabase Auth. Password tidak tersimpan di kode.</p>
-    <div class="alert" id="loginAlert">
-      <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span id="loginAlertMsg"></span>
-    </div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="admin@email.com">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="••••••••">
-    </div>
-    <button class="btn-primary" id="loginBtn" onclick="doLogin()">
-      <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-      Masuk
-    </button>
-  </div>
-</div>
-
-<div id="adminApp">
-  <header>
-    <div class="hdr">
-      <div style="display:flex;align-items:center;gap:0.65rem">
-        <a href="index.html" class="logo">
-          <div class="logo-mark">
-            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-          </div>
-          Prompt<span>Vault</span>
-        </a>
-        <span class="badge">ADMIN</span>
-      </div>
-      <div class="hdr-right">
-        <span class="user-chip" id="userEmail">—</span>
-        <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme">
-          <svg class="icon" id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-        </button>
-        <a href="index.html" class="btn-ghost">
-          <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Lihat Web
-        </a>
-        <button class="btn-ghost danger" onclick="doLogout()">
-          <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="wrap">
-    <div class="grid2">
-
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">
-            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-            Tambah Kategori
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="form-col">
-            <div class="row2">
-              <div class="field"><label>Emoji</label><input type="text" id="catEmoji" placeholder="🤖" maxlength="4"></div>
-              <div class="field"><label>Nama Kategori</label><input type="text" id="catName" placeholder="Claude, GPT..."></div>
-            </div>
-            <button class="btn-submit" id="btnCat" onclick="addCat()">
-              <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Tambah Kategori
-            </button>
-            <div class="status" id="catStatus"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">
-            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            Daftar Kategori
-          </div>
-          <span class="panel-meta" id="catMeta">0 kategori</span>
-        </div>
-        <div class="panel-body">
-          <div class="list" id="catList"><div class="empty-list">Loading...</div></div>
-        </div>
-      </div>
-
-      <div class="panel span2">
-        <div class="panel-head">
-          <div class="panel-title" id="formTitle">
-            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            Tambah Prompt
-          </div>
-          <button class="btn-ghost" id="cancelBtn" onclick="cancelEdit()" style="display:none">
-            <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Cancel
-          </button>
-        </div>
-        <div class="panel-body">
-          <input type="hidden" id="editId">
-          <div class="fg">
-            <div class="field"><label>Judul Prompt</label><input type="text" id="pTitle" placeholder="Nama prompt..."></div>
-            <div class="field"><label>Deskripsi Singkat</label><input type="text" id="pDescription" placeholder="Penjelasan singkat..."></div>
-          </div>
-          <div class="field">
-            <label>Kategori (bisa pilih banyak)</label>
-            <div class="custom-dropdown" id="pCatDropdown">
-              <div class="dropdown-trigger" onclick="toggleCategoryDropdown()">
-                <span id="selectedCatsDisplay">— Pilih Kategori —</span>
-                <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-              <div class="dropdown-menu" id="catDropdownMenu"></div>
-            </div>
-            <div id="selectedCatsList" class="cat-badge-list"></div>
-          </div>
-          <div class="field">
-            <label>Isi Prompt <span id="charCounter" style="color:var(--text-muted);font-size:0.7rem;">(0 karakter)</span></label>
-            <textarea id="pContent" rows="8" oninput="updateCharCounter()" placeholder="Tulis prompt lo di sini..."></textarea>
-          </div>
-          <button class="btn-submit" id="btnPrompt" onclick="savePrompt()" style="margin-top:0.85rem">
-            <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Tambah Prompt
-          </button>
-          <div class="status" id="promptStatus"></div>
-        </div>
-      </div>
-
-      <div class="panel span2">
-        <div class="panel-head">
-          <div class="panel-title">
-            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Semua Prompt
-          </div>
-          <span class="panel-meta" id="promptMeta">0 prompt</span>
-        </div>
-        <div class="panel-body">
-          <div class="search-row">
-            <input type="text" id="pSearch" placeholder="Cari prompt...">
-            <select id="pFilterCat"><option value="">Semua Kategori</option></select>
-            <select id="pLengthFilter">
-              <option value="all">Semua Panjang</option>
-              <option value="short">Pendek (&lt;1K)</option>
-              <option value="medium">Sedang (1K-4K)</option>
-              <option value="long">Panjang (&gt;4K)</option>
-            </select>
-          </div>
-          <div class="list" id="promptList" style="max-height:440px"><div class="empty-list">Loading...</div></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<div class="conf-overlay" id="confOverlay">
-  <div class="conf-box">
-    <div class="conf-icon">
-      <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-      </svg>
-    </div>
-    <h3 id="confTitle">Hapus ini?</h3>
-    <p id="confMsg">Data yang dihapus tidak bisa dikembalikan.</p>
-    <div class="conf-btns">
-      <button class="btn-cancel" onclick="closeConf()">Batal</button>
-      <button class="btn-confirm" onclick="doDelete()">
-        <svg class="icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-        Hapus
-      </button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast">
-  <div class="toast-dot"></div>
-  <span id="toastMsg">Berhasil!</span>
-</div>
-
-<script>
-const SUPA_URL = 'https://ihykejeacueeitthgkze.supabase.co';
-const SUPA_KEY = 'sb_publishable_W7N9zRqZlirQdLQvURiexA_Mj8Nvx5C';
-
-const { createClient } = supabase;
-const db = createClient(SUPA_URL, SUPA_KEY);
-
-let cats = [], prompts = [], delTarget = null, selectedCats = [];
-let copyCounts = {};
-
-function getTheme() { return document.documentElement.getAttribute('data-theme') || 'dark'; }
-
-function toggleTheme() {
-  const next = getTheme() === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('pv-theme', next);
-  updateThemeIcon(next);
-}
-
-function updateThemeIcon(theme) {
-  const icon = document.getElementById('themeIcon');
-  if (theme === 'light') {
-    icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-  } else {
-    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-  }
-}
-
-const savedTheme = localStorage.getItem('pv-theme') || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);
-updateThemeIcon(savedTheme);
-
-function loadCopyCounts() {
-  const saved = localStorage.getItem('pv-copy-counts');
-  if (saved) {
-    try {
-      copyCounts = JSON.parse(saved);
-    } catch (e) {
-      copyCounts = {};
-    }
-  }
-}
-
-function getCopyCount(promptId) {
-  return copyCounts[promptId] || 0;
-}
-
-async function checkSession() {
-  const { data: { session } } = await db.auth.getSession();
-  if (session) showAdmin(session.user);
-}
-
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  const btn = document.getElementById('loginBtn');
-  const alert = document.getElementById('loginAlert');
-  const alertMsg = document.getElementById('loginAlertMsg');
-  alert.className = 'alert';
-
-  if (!email || !pass) {
-    alertMsg.textContent = 'Email dan password wajib diisi!';
-    alert.className = 'alert err show';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Masuk...';
-
-  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-
-  if (error) {
-    alertMsg.textContent = error.message === 'Invalid login credentials' ? 'Email atau password salah!' : error.message;
-    alert.className = 'alert err show';
-    btn.disabled = false;
-    btn.innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Masuk';
-    return;
-  }
-
-  showAdmin(data.user);
-}
-
-function showAdmin(user) {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('adminApp').style.display = 'block';
-  document.getElementById('userEmail').textContent = user.email;
-  loadAll();
-}
-
-async function doLogout() {
-  await db.auth.signOut();
-  document.getElementById('adminApp').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginEmail').value = '';
-  document.getElementById('loginPass').value = '';
-}
-
-async function loadAll() {
-  loadCopyCounts();
-  
-  const [{ data: c }, { data: p }, { data: pc }] = await Promise.all([
-    db.from('categories').select('*').order('name'),
-    db.from('prompts').select('*').order('created_at', { ascending: false }),
-    db.from('prompt_categories').select('*')
-  ]);
-  
-  cats = c || [];
-  prompts = (p || []).map(prompt => {
-    prompt.category_ids = (pc || [])
-      .filter(x => x.prompt_id === prompt.id)
-      .map(x => x.category_id);
-    prompt.categories = cats.filter(c => prompt.category_ids.includes(c.id));
-    prompt.charCount = prompt.content ? prompt.content.length : 0;
-    prompt.lengthClass = getLengthClass(prompt.charCount);
-    return prompt;
-  });
-  
-  renderCatList();
-  renderPromptList();
-  updateSelects();
-  renderCategoryDropdown();
-}
-
-function getLengthClass(count) {
-  if (count < 1000) return 'short';
-  if (count <= 4000) return 'medium';
-  return 'long';
-}
-
-function getLengthLabel(count) {
-  if (count < 1000) return 'Pendek';
-  if (count <= 4000) return 'Sedang';
-  return 'Panjang';
-}
-
-function formatCharCount(count) {
-  if (count >= 1000) {
-    return (count / 1000).toFixed(1) + 'k';
-  }
-  return count.toString();
-}
-
-function updateCharCounter() {
-  const content = document.getElementById('pContent').value;
-  const count = content.length;
-  const counter = document.getElementById('charCounter');
-  counter.textContent = `(${count.toLocaleString('id-ID')} karakter)`;
-}
-
-function renderCategoryDropdown() {
-  const menu = document.getElementById('catDropdownMenu');
-  if (!cats.length) {
-    menu.innerHTML = '<div class="dropdown-option">Belum ada kategori</div>';
-    return;
-  }
-  menu.innerHTML = cats.map(c => {
-    const isSelected = selectedCats.includes(c.id);
-    return `
-      <div class="dropdown-option ${isSelected ? 'selected' : ''}" onclick="toggleCatSelection('${c.id}')">
-        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleCatSelection('${c.id}')">
-        <span>${c.emoji ? c.emoji + ' ' : ''}${escapeHtml(c.name)}</span>
-      </div>
-    `;
-  }).join('');
-  updateSelectedCatsDisplay();
-}
-
-function toggleCategoryDropdown() {
-  document.getElementById('catDropdownMenu').classList.toggle('show');
-}
-
-function toggleCatSelection(catId) {
-  const index = selectedCats.indexOf(catId);
-  if (index === -1) {
-    selectedCats.push(catId);
-  } else {
-    selectedCats.splice(index, 1);
-  }
-  renderCategoryDropdown();
-}
-
-function updateSelectedCatsDisplay() {
-  const display = document.getElementById('selectedCatsDisplay');
-  const listEl = document.getElementById('selectedCatsList');
-  if (selectedCats.length === 0) {
-    display.textContent = '— Pilih Kategori —';
-    listEl.innerHTML = '';
-    return;
-  }
-  const selected = cats.filter(c => selectedCats.includes(c.id));
-  display.textContent = selected.map(c => c.name).join(', ');
-  listEl.innerHTML = selected.map(c => `
-    <span class="cat-badge">
-      ${c.emoji ? c.emoji + ' ' : ''}${escapeHtml(c.name)}
-      <span style="cursor:pointer;margin-left:4px;" onclick="toggleCatSelection('${c.id}')">✕</span>
-    </span>
-  `).join('');
-}
-
-function renderCatList() {
-  const el = document.getElementById('catList');
-  document.getElementById('catMeta').textContent = cats.length + ' kategori';
-  if (!cats.length) { el.innerHTML = '<div class="empty-list">Belum ada kategori.</div>'; return; }
-  el.innerHTML = cats.map(c => {
-    const n = prompts.filter(p => p.category_ids.includes(c.id)).length;
-    return `<div class="list-item">
-      <div class="list-info">
-        <div class="list-name">${c.emoji ? c.emoji + ' ' : ''}${escapeHtml(c.name)}</div>
-        <div class="list-sub">${n} prompt</div>
-      </div>
-      <div class="list-actions">
-        <button class="btn-del" onclick="askDel('cat','${c.id}','${escapeHtml(c.name)}')">
-          <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-          Hapus
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderPromptList() {
-  const el = document.getElementById('promptList');
-  const sq = document.getElementById('pSearch').value.toLowerCase();
-  const sf = document.getElementById('pFilterCat').value;
-  const sl = document.getElementById('pLengthFilter').value;
-  
-  let data = [...prompts];
-  
-  if (sq) {
-    data = data.filter(p => 
-      p.title.toLowerCase().includes(sq) || 
-      p.content.toLowerCase().includes(sq) || 
-      (p.description || '').toLowerCase().includes(sq)
-    );
-  }
-  
-  if (sf) data = data.filter(p => p.category_ids.includes(sf));
-  if (sl !== 'all') data = data.filter(p => p.lengthClass === sl);
-  
-  document.getElementById('promptMeta').textContent = data.length + '/' + prompts.length + ' prompt';
-  
-  if (!data.length) {
-    el.innerHTML = '<div class="empty-list">Belum ada prompt.</div>';
-    return;
-  }
-  
-  el.innerHTML = data.map(p => {
-    const catLabels = (p.categories || []).map(c => (c.emoji ? c.emoji + ' ' : '') + c.name).join(', ');
-    const prev = p.content.length > 90 ? p.content.slice(0,90)+'...' : p.content;
-    const desc = p.description ? `<div class="list-sub" style="color:var(--accent-secondary);">📝 ${escapeHtml(p.description)}</div>` : '';
-    const copyCount = getCopyCount(p.id);
-    const lenClass = p.lengthClass;
+    <div class="particles" id="particles"></div>
     
-    return `<div class="list-item">
-      <div class="list-info">
-        <div class="list-name">${escapeHtml(p.title)}</div>
-        ${desc}
-        <div class="list-sub">📁 ${escapeHtml(catLabels)}</div>
-        <div class="list-sub" style="display:flex;gap:0.5rem;margin-top:0.25rem;">
-          <span class="char-badge ${lenClass}">📏 ${formatCharCount(p.charCount)} chars</span>
-          <span class="char-badge ${lenClass}">📊 ${getLengthLabel(p.charCount)}</span>
-          <span class="char-badge" style="color:var(--text-muted);">📋 ${copyCount}x</span>
+    <div class="container">
+        <div class="turtle-wrapper">
+            <div class="led-glow"></div>
+            <svg class="turtle-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <linearGradient id="shellGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#e8e8e8;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                
+                <ellipse cx="100" cy="115" rx="55" ry="45" fill="url(#shellGrad)" filter="url(#softGlow)" opacity="0.9"/>
+                
+                <ellipse cx="100" cy="115" rx="40" ry="32" fill="none" stroke="#c0c0c0" stroke-width="1.5" opacity="0.5"/>
+                <line x1="100" y1="83" x2="100" y2="147" stroke="#c0c0c0" stroke-width="1.5" opacity="0.5"/>
+                <line x1="60" y1="115" x2="140" y2="115" stroke="#c0c0c0" stroke-width="1.5" opacity="0.5"/>
+                <line x1="70" y1="95" x2="130" y2="135" stroke="#c0c0c0" stroke-width="1.5" opacity="0.5"/>
+                <line x1="130" y1="95" x2="70" y2="135" stroke="#c0c0c0" stroke-width="1.5" opacity="0.5"/>
+                
+                <ellipse cx="100" cy="75" rx="25" ry="22" fill="url(#skinGrad)" filter="url(#softGlow)"/>
+                
+                <circle cx="90" cy="70" r="5" fill="#2a2a3e"/>
+                <circle cx="110" cy="70" r="5" fill="#2a2a3e"/>
+                <circle cx="91" cy="69" r="1.5" fill="#ffffff"/>
+                <circle cx="111" cy="69" r="1.5" fill="#ffffff"/>
+                
+                <path d="M 85 82 Q 100 88 115 82" stroke="#2a2a3e" stroke-width="2" fill="none" stroke-linecap="round"/>
+                
+                <ellipse cx="75" cy="78" rx="8" ry="12" fill="url(#skinGrad)" transform="rotate(-20 75 78)" filter="url(#softGlow)"/>
+                <ellipse cx="125" cy="78" rx="8" ry="12" fill="url(#skinGrad)" transform="rotate(20 125 78)" filter="url(#softGlow)"/>
+                
+                <ellipse cx="60" cy="130" rx="12" ry="8" fill="url(#skinGrad)" transform="rotate(-30 60 130)" filter="url(#softGlow)"/>
+                <ellipse cx="140" cy="130" rx="12" ry="8" fill="url(#skinGrad)" transform="rotate(30 140 130)" filter="url(#softGlow)"/>
+                <ellipse cx="70" cy="155" rx="10" ry="14" fill="url(#skinGrad)" transform="rotate(-10 70 155)" filter="url(#softGlow)"/>
+                <ellipse cx="130" cy="155" rx="10" ry="14" fill="url(#skinGrad)" transform="rotate(10 130 155)" filter="url(#softGlow)"/>
+                
+                <path d="M 95 78 Q 100 75 105 78" stroke="#2a2a3e" stroke-width="1.5" fill="none" opacity="0.6"/>
+                
+                <ellipse cx="100" cy="65" rx="3" ry="2" fill="#d0d0d0" opacity="0.5"/>
+            </svg>
         </div>
-        <div class="list-sub">${escapeHtml(prev.replace(/\n/g,' '))}</div>
-      </div>
-      <div class="list-actions">
-        <button class="btn-edt" onclick="editPrompt('${p.id}')">
-          <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Edit
-        </button>
-        <button class="btn-del" onclick="askDel('prompt','${p.id}','${escapeHtml(p.title)}')">
-          <svg class="icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-          Hapus
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-}
+        
+        <h1>Oops. This Website Has Been Moved</h1>
+        <p>The page you are looking for has been relocated to a new address. Please check the URL or contact the administrator for assistance.</p>
+    </div>
 
-function updateSelects() {
-  const opts = cats.map(c => `<option value="${c.id}">${c.emoji ? c.emoji + ' ' : ''}${escapeHtml(c.name)}</option>`).join('');
-  document.getElementById('pFilterCat').innerHTML = '<option value="">Semua Kategori</option>' + opts;
-}
-
-document.addEventListener('click', function(e) {
-  const dropdown = document.getElementById('catDropdownMenu');
-  const trigger = document.querySelector('.dropdown-trigger');
-  if (trigger && !trigger.contains(e.target) && !dropdown.contains(e.target)) {
-    dropdown.classList.remove('show');
-  }
-});
-
-async function addCat() {
-  const name = document.getElementById('catName').value.trim();
-  const emoji = document.getElementById('catEmoji').value.trim();
-  const btn = document.getElementById('btnCat');
-  const st = document.getElementById('catStatus');
-  if (!name) { setStatus(st, 'Nama kategori wajib diisi!', 'err'); return; }
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>';
-  const { error } = await db.from('categories').insert({ name, emoji: emoji || null });
-  if (error) { setStatus(st, error.message, 'err'); }
-  else {
-    document.getElementById('catName').value = '';
-    document.getElementById('catEmoji').value = '';
-    setStatus(st, '"' + name + '" berhasil ditambah!', 'ok');
-    showToast('Kategori ditambah!');
-    await loadAll();
-  }
-  btn.disabled = false;
-  btn.innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Kategori';
-}
-
-async function savePrompt() {
-  const title = document.getElementById('pTitle').value.trim();
-  const description = document.getElementById('pDescription').value.trim() || null;
-  const content = document.getElementById('pContent').value.trim();
-  const editId = document.getElementById('editId').value;
-  const btn = document.getElementById('btnPrompt');
-  const st = document.getElementById('promptStatus');
-  
-  if (!title) { setStatus(st, 'Judul prompt wajib diisi!', 'err'); return; }
-  if (!content) { setStatus(st, 'Isi prompt wajib diisi!', 'err'); return; }
-  if (selectedCats.length === 0) { setStatus(st, 'Pilih minimal satu kategori!', 'err'); return; }
-  
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>';
-  
-  let promptId = editId;
-  let error;
-  
-  if (editId) {
-    ({ error } = await db.from('prompts').update({ title, description, content }).eq('id', editId));
-  } else {
-    const { data, error: insertError } = await db.from('prompts').insert({ title, description, content }).select();
-    error = insertError;
-    if (data && data[0]) promptId = data[0].id;
-  }
-  
-  if (error) {
-    setStatus(st, error.message, 'err');
-  } else {
-    if (editId) {
-      await db.from('prompt_categories').delete().eq('prompt_id', editId);
-    }
-    if (promptId && selectedCats.length > 0) {
-      const inserts = selectedCats.map(catId => ({ prompt_id: promptId, category_id: catId }));
-      await db.from('prompt_categories').insert(inserts);
-    }
-    cancelEdit();
-    setStatus(st, '"' + title + '" berhasil ' + (editId ? 'diupdate' : 'ditambah') + '!', 'ok');
-    showToast(editId ? 'Prompt diupdate!' : 'Prompt ditambah!');
-    await loadAll();
-  }
-  
-  btn.disabled = false;
-  const isEdit = !!document.getElementById('editId').value;
-  btn.innerHTML = (isEdit ? '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Prompt' : '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Prompt');
-}
-
-function editPrompt(id) {
-  const p = prompts.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('editId').value = id;
-  document.getElementById('pTitle').value = p.title;
-  document.getElementById('pDescription').value = p.description || '';
-  document.getElementById('pContent').value = p.content;
-  updateCharCounter();
-  selectedCats = [...(p.category_ids || [])];
-  renderCategoryDropdown();
-  updateSelectedCatsDisplay();
-  document.getElementById('btnPrompt').className = 'btn-submit update';
-  document.getElementById('btnPrompt').innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Prompt';
-  document.getElementById('cancelBtn').style.display = 'inline-flex';
-  document.getElementById('formTitle').innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edit Prompt';
-  setStatus(document.getElementById('promptStatus'), 'Mode edit aktif — jangan lupa simpan!', 'ok');
-}
-
-function cancelEdit() {
-  document.getElementById('editId').value = '';
-  document.getElementById('pTitle').value = '';
-  document.getElementById('pDescription').value = '';
-  document.getElementById('pContent').value = '';
-  updateCharCounter();
-  selectedCats = [];
-  renderCategoryDropdown();
-  updateSelectedCatsDisplay();
-  document.getElementById('btnPrompt').className = 'btn-submit';
-  document.getElementById('btnPrompt').innerHTML = '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah Prompt';
-  document.getElementById('cancelBtn').style.display = 'none';
-  document.getElementById('formTitle').innerHTML = '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Tambah Prompt';
-  const st = document.getElementById('promptStatus');
-  st.className = 'status';
-}
-
-function askDel(type, id, name) {
-  delTarget = { type, id };
-  document.getElementById('confTitle').textContent = 'Hapus "' + name + '"?';
-  document.getElementById('confMsg').textContent = type === 'cat' ? 'Kategori ini akan dihapus permanen.' : 'Prompt ini akan dihapus permanen dan tidak bisa dikembalikan.';
-  document.getElementById('confOverlay').classList.add('open');
-}
-
-function closeConf() { document.getElementById('confOverlay').classList.remove('open'); delTarget = null; }
-
-async function doDelete() {
-  if (!delTarget) return;
-  const { type, id } = delTarget;
-  closeConf();
-  const table = type === 'cat' ? 'categories' : 'prompts';
-  const { error } = await db.from(table).delete().eq('id', id);
-  if (error) showToast('Gagal hapus: ' + error.message, true);
-  else { showToast(type === 'cat' ? 'Kategori dihapus!' : 'Prompt dihapus!'); await loadAll(); }
-}
-
-function setStatus(el, msg, type) {
-  el.textContent = msg;
-  el.className = 'status ' + type;
-  setTimeout(() => { el.className = 'status'; }, 4500);
-}
-
-function showToast(msg, isErr) {
-  document.getElementById('toastMsg').textContent = msg;
-  const t = document.getElementById('toast');
-  t.className = 'toast' + (isErr ? ' err' : '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-function escapeHtml(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-document.getElementById('pSearch').addEventListener('input', renderPromptList);
-document.getElementById('pFilterCat').addEventListener('change', renderPromptList);
-document.getElementById('pLengthFilter').addEventListener('change', renderPromptList);
-document.getElementById('confOverlay').addEventListener('click', e => { if (e.target.id === 'confOverlay') closeConf(); });
-
-checkSession();
-</script>
+    <script>
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+    </script>
 </body>
 </html>
