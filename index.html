@@ -24,7 +24,7 @@
   --text-subtle: #64748b;
   --length-short: #10b981;
   --length-medium: #f59e0b;
-  --length-long: #ef4444;
+ --length-long: #ef4444;
   --hot: #f97316;
   --hot-glow: rgba(249,115,22,0.2);
   --new: #6366f1;
@@ -610,21 +610,6 @@ header {
 .char-count.medium { color: var(--length-medium); background: rgba(245,158,11,0.1); }
 .char-count.long { color: var(--length-long); background: rgba(239,68,68,0.1); }
 
-.copy-count {
-  display: inline-flex; align-items: center; gap: 0.2rem;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.65rem; font-weight: 600;
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  background: var(--bg-hover);
-  color: var(--text-muted);
-}
-
-.copy-count::before {
-  content: '📋';
-  font-size: 0.65rem;
-}
-
 .card-footer {
   display: flex; align-items: center; justify-content: space-between;
   margin-top: 0.75rem;
@@ -1176,10 +1161,6 @@ header {
         <div class="stat-n" id="statC">—</div>
         <div class="stat-l">Kategori</div>
       </div>
-      <div class="stat">
-        <div class="stat-n" id="statTotalCopies">0</div>
-        <div class="stat-l">Total Copy</div>
-      </div>
     </div>
   </div>
 </div>
@@ -1218,7 +1199,6 @@ header {
             <option value="az">A - Z</option>
             <option value="chars-asc">Karakter ↑</option>
             <option value="chars-desc">Karakter ↓</option>
-            <option value="copies-desc">Tersalin 🔥</option>
           </select>
         </div>
       </div>
@@ -1350,7 +1330,6 @@ let query = '';
 let sort = 'newest';
 let lengthFilter = 'all';
 let curPrompt = null;
-let copyCounts = {};
 
 let currentPage = 1;
 const ITEMS_PER_PAGE = 10;
@@ -1376,75 +1355,6 @@ function updateThemeIcon(theme) {
 const savedTheme = localStorage.getItem('pv-theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 updateThemeIcon(savedTheme);
-
-async function loadCopyCounts() {
-  const { data, error } = await db
-    .from('copy_counts')
-    .select('prompt_id, count');
-  
-  if (error) {
-    console.error('Error loading copy counts:', error);
-    return {};
-  }
-  
-  const counts = {};
-  data?.forEach(item => {
-    counts[item.prompt_id] = item.count;
-  });
-  return counts;
-}
-
-async function saveCopyCount(promptId, newCount) {
-  const { error } = await db
-    .from('copy_counts')
-    .upsert({ 
-      prompt_id: promptId, 
-      count: newCount,
-      updated_at: new Date().toISOString()
-    }, { 
-      onConflict: 'prompt_id' 
-    });
-  
-  if (error) {
-    console.error('Error saving copy count:', error);
-  }
-}
-
-async function incrementCopyCount(promptId) {
-  const currentCount = copyCounts[promptId] || 0;
-  const newCount = currentCount + 1;
-  copyCounts[promptId] = newCount;
-  
-  await saveCopyCount(promptId, newCount);
-  await updateTotalCopies();
-}
-
-async function updateTotalCopies() {
-  const total = Object.values(copyCounts).reduce((a, b) => a + b, 0);
-  document.getElementById('statTotalCopies').textContent = total;
-}
-
-function getCopyCount(promptId) {
-  return copyCounts[promptId] || 0;
-}
-
-function getTopHotPrompts(limit = 3) {
-  return Object.entries(copyCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(entry => entry[0]);
-}
-
-function isNewPrompt(createdAt) {
-  const now = new Date();
-  const created = new Date(createdAt);
-  const diffHours = (now - created) / (1000 * 60 * 60);
-  return diffHours <= 4;
-}
-
-function isHotPrompt(promptId, topHotIds) {
-  return topHotIds.includes(promptId);
-}
 
 function showCopyNotification() {
   const notification = document.getElementById('copyNotification');
@@ -1481,8 +1391,6 @@ function showCopyNotification() {
 }
 
 async function init() {
-  copyCounts = await loadCopyCounts();
-  
   const [{ data: c, error: ce }, { data: p, error: pe }, { data: pc }] = await Promise.all([
     db.from('categories').select('*').order('name'),
     db.from('prompts').select('*').order('created_at', { ascending: false }),
@@ -1507,16 +1415,12 @@ async function init() {
   
   document.getElementById('statP').textContent = prompts.length;
   document.getElementById('statC').textContent = cats.length;
-  await updateTotalCopies();
   renderCats();
   applyFiltersAndRender();
   
-  const welcomeShown = localStorage.getItem('pv-welcome-shown');
-  if (!welcomeShown) {
-    setTimeout(() => {
-      showWelcome();
-    }, 500);
-  }
+  setTimeout(() => {
+    showWelcome();
+  }, 500);
 }
 
 function showErr() {
@@ -1542,7 +1446,6 @@ function closeWelcome() {
   const overlay = document.getElementById('welcomeOverlay');
   overlay.classList.remove('show');
   document.body.style.overflow = '';
-  localStorage.setItem('pv-welcome-shown', 'true');
 }
 
 function getLengthClass(count) {
@@ -1629,8 +1532,6 @@ function getFilteredData() {
     data.sort((a, b) => a.charCount - b.charCount);
   } else if (sort === 'chars-desc') {
     data.sort((a, b) => b.charCount - a.charCount);
-  } else if (sort === 'copies-desc') {
-    data.sort((a, b) => getCopyCount(b.id) - getCopyCount(a.id));
   } else {
     data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
@@ -1671,22 +1572,16 @@ function renderGrid(data, startIndex = 0) {
     return;
   }
   
-  const topHotIds = getTopHotPrompts(3);
-  
   grid.innerHTML = data.map((p, i) => {
     const catNames = p.categories.map(c => c.name).join(', ');
     const ci = cats.findIndex(c => c.id === (p.categories[0]?.id || ''));
     const col = PALETTE[(ci >= 0 ? ci : startIndex + i) % PALETTE.length];
     const date = new Date(p.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     const lenClass = p.lengthClass;
-    const isNew = isNewPrompt(p.created_at);
-    const isHot = isHotPrompt(p.id, topHotIds);
-    const copyCount = getCopyCount(p.id);
+    const isNew = (new Date() - new Date(p.created_at)) / (1000 * 60 * 60) <= 4;
     
     let badges = '';
-    if (isHot) {
-      badges += '<span class="hot-badge">HOT</span>';
-    } else if (isNew) {
+    if (isNew) {
       badges += '<span class="new-badge">NEW!</span>';
     }
     
@@ -1713,9 +1608,6 @@ function renderGrid(data, startIndex = 0) {
               <line x1="17" y1="19" x2="17" y2="19"/>
             </svg>
             ${formatCharCount(p.charCount)} karakter
-          </div>
-          <div class="copy-count">
-            ${copyCount}x
           </div>
         </div>
         <div class="card-footer">
@@ -1785,15 +1677,10 @@ function openModal(id) {
   const lenClass = p.lengthClass;
   const wordCount = Math.ceil(p.charCount / 5);
   const tokenEst = Math.ceil(p.charCount / 4);
-  const copyCount = getCopyCount(p.id);
-  const isNew = isNewPrompt(p.created_at);
-  const topHotIds = getTopHotPrompts(3);
-  const isHot = isHotPrompt(p.id, topHotIds);
+  const isNew = (new Date() - new Date(p.created_at)) / (1000 * 60 * 60) <= 4;
   
   let badgeExtra = '';
-  if (isHot) {
-    badgeExtra = '<span class="hot-badge" style="margin-left:0.5rem;">HOT</span>';
-  } else if (isNew) {
+  if (isNew) {
     badgeExtra = '<span class="new-badge" style="margin-left:0.5rem;">NEW!</span>';
   }
   
@@ -1814,10 +1701,6 @@ function openModal(id) {
     <div class="stat-item">
       <div class="stat-label">Token (est)</div>
       <div class="stat-value">~${tokenEst.toLocaleString('id-ID')}</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-label">Tersalin</div>
-      <div class="stat-value">${copyCount}x</div>
     </div>
   `;
   
@@ -1845,7 +1728,6 @@ function closeModal() {
 async function copyModal() {
   if (!curPrompt) return;
   await navigator.clipboard.writeText(curPrompt.content);
-  await incrementCopyCount(curPrompt.id);
   
   const btn = document.getElementById('mCopyBtn');
   btn.className = 'modal-copy ok';
@@ -1857,7 +1739,6 @@ async function copyModal() {
   `;
   
   showCopyNotification();
-  applyFiltersAndRender();
   
   setTimeout(() => {
     btn.className = 'modal-copy';
@@ -1875,7 +1756,6 @@ async function quickCopy(id, btn) {
   const p = prompts.find(x => x.id === id);
   if (!p) return;
   await navigator.clipboard.writeText(p.content);
-  await incrementCopyCount(p.id);
   
   btn.className = 'copy-btn ok';
   btn.innerHTML = `
@@ -1886,7 +1766,6 @@ async function quickCopy(id, btn) {
   `;
   
   showCopyNotification();
-  applyFiltersAndRender();
   
   setTimeout(() => {
     btn.className = 'copy-btn';
