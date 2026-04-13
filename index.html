@@ -615,7 +615,11 @@ header {
   margin-top: 0.75rem;
 }
 
-.copy-btn {
+.card-actions {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.copy-btn, .download-btn {
   display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.4rem 0.8rem;
   background: var(--bg-hover);
@@ -627,13 +631,13 @@ header {
   cursor: pointer; transition: var(--transition);
 }
 
-.copy-btn:hover {
+.copy-btn:hover, .download-btn:hover {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
 }
 
-.copy-btn.ok {
+.copy-btn.ok, .download-btn.ok {
   background: var(--accent-tertiary);
   border-color: var(--accent-tertiary);
   color: white;
@@ -1308,8 +1312,8 @@ header {
 </div>
 
 <script>
-const SUPA_URL = 'https://ihykejeacueeitthgkze.supabase.co';
-const SUPA_KEY = 'sb_publishable_W7N9zRqZlirQdLQvURiexA_Mj8Nvx5C';
+const SUPA_URL = 'gantisendiri';
+const SUPA_KEY = 'gantisendiri';
 
 const { createClient } = supabase;
 const db = createClient(SUPA_URL, SUPA_KEY);
@@ -1388,6 +1392,15 @@ function showCopyNotification() {
   setTimeout(() => {
     notification.classList.remove('show');
   }, duration);
+}
+
+function sanitizeFilename(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 }
 
 async function init() {
@@ -1611,13 +1624,23 @@ function renderGrid(data, startIndex = 0) {
           </div>
         </div>
         <div class="card-footer">
-          <button class="copy-btn" onclick="event.stopPropagation();quickCopy('${p.id}',this)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2"/>
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-            </svg>
-            Copy
-          </button>
+          <div class="card-actions">
+            <button class="copy-btn" onclick="event.stopPropagation();quickCopy('${p.id}',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copy
+            </button>
+            <button class="download-btn" onclick="event.stopPropagation();quickDownload('${p.id}',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download
+            </button>
+          </div>
           <span class="card-date">${date}</span>
         </div>
       </div>`;
@@ -1775,6 +1798,44 @@ async function quickCopy(id, btn) {
         <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
       </svg>
       Copy
+    `;
+  }, 2000);
+}
+
+async function quickDownload(id, btn) {
+  const p = prompts.find(x => x.id === id);
+  if (!p) return;
+  
+  const sanitizedTitle = sanitizeFilename(p.title);
+  const filename = `${sanitizedTitle}.txt`;
+  
+  const blob = new Blob([p.content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  btn.className = 'download-btn ok';
+  btn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    Downloaded!
+  `;
+  
+  setTimeout(() => {
+    btn.className = 'download-btn';
+    btn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download
     `;
   }, 2000);
 }
